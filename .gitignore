@@ -1,0 +1,7 @@
+#archivos de entorno virtual y caché
+.venv
+.env
+__pycache__/
+
+# archivos de node.js
+node_modules/
