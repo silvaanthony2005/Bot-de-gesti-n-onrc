@@ -32,8 +32,20 @@
             "isBackground": true
         },
         {
+            "label": "Start n8n",
+            "type": "shell",
+            "command": "n8n start",
+            "presentation": {
+                "reveal": "always",
+                "panel": "dedicated",
+                "group": "server"
+            },
+            "problemMatcher": [],
+            "isBackground": true
+        },
+        {
             "label": "Start All Services",
-            "dependsOn": ["Start Backend", "Start Frontend"],
+            "dependsOn": ["Start Backend", "Start Frontend", "Start n8n"],
             "problemMatcher": [],
             "group": {
                 "kind": "build",
