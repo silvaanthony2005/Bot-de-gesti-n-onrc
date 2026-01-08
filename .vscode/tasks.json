@@ -1,0 +1,59 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Start Backend",
+            "type": "shell",
+            "command": "cd backend && (if exist \"venv\\Scripts\\activate\" (call venv\\Scripts\\activate) else (if exist \".venv\\Scripts\\activate\" (call .venv\\Scripts\\activate))) && uvicorn app.main:app --reload",
+            "presentation": {
+                "reveal": "always",
+                "panel": "dedicated",
+                "group": "server"
+            },
+            "problemMatcher": [],
+            "isBackground": true
+        },
+        {
+            "label": "Start Frontend",
+            "type": "shell",
+            "command": "cd frontend && npm run dev",
+            "presentation": {
+                "reveal": "always",
+                "panel": "dedicated",
+                "group": "server"
+            },
+            "problemMatcher": [],
+            "isBackground": true
+        },
+        {
+            "label": "Start All Services",
+            "dependsOn": ["Start Backend", "Start Frontend"],
+            "problemMatcher": [],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            }
+        },
+        {
+            "label": "Install Dependencies",
+            "dependsOn": ["Install Backend Deps", "Install Frontend Deps"],
+            "problemMatcher": []
+        },
+        {
+            "label": "Install Backend Deps",
+            "type": "shell",
+            "command": "cd backend && pip install -r requirements.txt",
+            "presentation": {
+                "reveal": "always"
+            }
+        },
+        {
+            "label": "Install Frontend Deps",
+            "type": "shell",
+            "command": "cd frontend && npm install",
+            "presentation": {
+                "reveal": "always"
+            }
+        }
+    ]
+}
