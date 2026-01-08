@@ -8,7 +8,7 @@ echo.
 
 :: Iniciar Backend
 echo [1/2] Iniciando Backend (FastAPI)...
-start "Bot CNE Backend" cmd /k "cd backend && (if exist venv\Scripts\activate.bat (call venv\Scripts\activate.bat) else (if exist .venv\Scripts\activate.ps1 (powershell -ExecutionPolicy Bypass -File .venv\Scripts\activate.ps1) else (echo No se encontro entorno virtual, usando python global...))) && uvicorn app.main:app --reload"
+start "Bot CNE Backend" cmd /k "cd backend && (if exist .venv\Scripts\activate.bat (call .venv\Scripts\activate.bat) else (if exist venv\Scripts\activate.bat (call venv\Scripts\activate.bat))) && uvicorn app.main:app --reload"
 
 :: Iniciar Frontend
 echo [2/2] Iniciando Frontend (React)...
