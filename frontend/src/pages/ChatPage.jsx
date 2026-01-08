@@ -1,24 +1,46 @@
-import React, { useState } from 'react';
-import { Send, User, Bot } from 'lucide-react';
+import React, { useState, useRef, useEffect } from 'react';
+import { Send, User, Bot, Loader2 } from 'lucide-react';
 import { Input } from '@/components/ui/Input';
+import { chatService } from '@/services/chatService';
 
 export default function ChatPage() {
   const [messages, setMessages] = useState([
     { id: 1, role: 'bot', text: 'Hello! How can I help you with your learning journey today?' }
   ]);
   const [input, setInput] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const messagesEndRef = useRef(null);
 
-  const handleSend = (e) => {
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages, isLoading]);
+
+  const handleSend = async (e) => {
     e.preventDefault();
-    if (!input.trim()) return;
-    
-    setMessages(prev => [...prev, { id: Date.now(), role: 'user', text: input }]);
+    if (!input.trim() || isLoading) return;
+
+    const userMessage = input.trim();
+    setMessages(prev => [...prev, { id: Date.now(), role: 'user', text: userMessage }]);
     setInput('');
-    
-    // Simulate generic response
-    setTimeout(() => {
-        setMessages(prev => [...prev, { id: Date.now() + 1, role: 'bot', text: 'That sounds interesting! Tell me more about it.' }]);
-    }, 1000);
+    setIsLoading(true);
+
+    try {
+      const data = await chatService.sendMessage(userMessage);
+      setMessages(prev => [...prev, { id: Date.now() + 1, role: 'bot', text: data.response }]);
+    } catch (error) {
+      console.error(error);
+      setMessages(prev => [...prev, { 
+        id: Date.now() + 1, 
+        role: 'bot', 
+        text: 'Sorry, I am having trouble connecting to the server. Please check if the backend is running.' 
+      }]);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -39,10 +61,26 @@ export default function ChatPage() {
                             ? 'bg-dark-800 rounded-tl-none text-gray-200 border border-white/5' 
                             : 'bg-primary-600 rounded-tr-none text-white'
                     }`}>
-                        <p className="text-sm md:text-base leading-relaxed">{msg.text}</p>
+                        <p className="text-sm md:text-base leading-relaxed whitespace-pre-wrap">{msg.text}</p>
                     </div>
                 </div>
             ))}
+            
+            {isLoading && (
+                <div className="flex gap-4 items-start">
+                    <div className="w-8 h-8 md:w-10 md:h-10 rounded-full flex items-center justify-center flex-shrink-0 shadow-lg bg-gradient-to-br from-primary-500 to-primary-700">
+                        <Loader2 className="w-5 h-5 text-white animate-spin" />
+                    </div>
+                    <div className="bg-dark-800 rounded-2xl rounded-tl-none p-4 border border-white/5">
+                        <div className="flex space-x-2">
+                            <div className="w-2 h-2 bg-gray-500 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
+                            <div className="w-2 h-2 bg-gray-500 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
+                            <div className="w-2 h-2 bg-gray-500 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+                        </div>
+                    </div>
+                </div>
+            )}
+            <div ref={messagesEndRef} />
         </div>
 
         <div className="p-4 bg-dark-900/50 backdrop-blur-sm mt-auto">
@@ -50,15 +88,16 @@ export default function ChatPage() {
                 <Input 
                     value={input}
                     onChange={(e) => setInput(e.target.value)}
-                    placeholder="Type your message..." 
-                    className="pr-12 bg-dark-800 border-white/10 focus:border-primary-500 transition-colors h-12 rounded-xl shadow-lg"
+                    placeholder={isLoading ? "Waiting for AI..." : "Type your message..."}
+                    disabled={isLoading}
+                    className="pr-12 bg-dark-800 border-white/10 focus:border-primary-500 transition-colors h-12 rounded-xl shadow-lg disabled:opacity-50"
                 />
                 <button 
                     type="submit"
-                    disabled={!input.trim()}
+                    disabled={!input.trim() || isLoading}
                     className="absolute right-2 top-1/2 -translate-y-1/2 p-2 bg-primary-600 hover:bg-primary-500 text-white rounded-lg disabled:opacity-50 disabled:cursor-not-allowed transition-all"
                 >
-                    <Send className="w-5 h-5" />
+                    {isLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : <Send className="w-5 h-5" />}
                 </button>
             </form>
         </div>
