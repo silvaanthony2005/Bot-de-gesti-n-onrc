@@ -72,10 +72,14 @@ Actúa como el menú principal.
 
 #### 2. Chat (`ChatPage.jsx`)
 La interfaz conversacional.
+- **Integración Backend:** 
+  - Utiliza `chatService` para comunicarse con la API.
+  - Implementa manejo de estados de carga (`isLoading`) con indicadores visuales (animación de puntos saltando).
+  - Incluye reconexión automática de scroll (`scrollToBottom`) cada vez que llegan mensajes nuevos.
 - **Alineación de Mensajes**:
   - Lógica condicional: `msg.role === 'user' ? 'flex-row-reverse'`.
   - Alineación `items-start` para que el avatar se mantenga arriba incluso en mensajes largos.
-- **Estado Local**: Actualmente usa `useState` para simular la lista de mensajes.
+- **Renderizado:** Soporta texto multilínea (`whitespace-pre-wrap`) para respuestas largas de la IA.
 
 ---
 
@@ -95,10 +99,20 @@ Todo el diseño se escribe pensando en móvil primero (clases base) y luego se a
 
 ---
 
-## 5. Próximos Pasos (Hoja de Ruta)
+## 5. Integración Frontend-Backend
 
-Actualmente, el frontend es una **SPA (Single Page Application)** completamente funcional a nivel visual. Los siguientes pasos para completar el sistema son:
+La comunicación se realiza mediante una API RESTful siguiendo estos principios:
 
-1.  **Desarrollo del Backend**: Crear una API (Python/Node.js) para procesar los mensajes.
-2.  **Integración de API**: Reemplazar la simulación `setTimeout` en `ChatPage` con una llamada `fetch()` o `axios` al backend.
-3.  **Gestión de Estado Global**: Si el usuario necesita persistir la sesión o datos entre páginas, se podría implementar Context API o Zustand.
+1.  **Cliente HTTP (`lib/api.js`)**: 
+    - Se utiliza **Axios** para crear una instancia preconfigurada.
+    - Base URL: `http://localhost:8000/api`.
+    - Headers: `Content-Type: application/json`.
+
+2.  **Capa de Servicios (`services/`)**:
+    - **`chatService.js`**: Desacopla la vista de la lógica de red.
+    - Método `sendMessage(message, sessionId)`: Maneja el POST al endpoint `/chat` y procesa errores.
+
+3.  **Flujo de Datos**:
+    - **Request**: `{ "message": "Texto usuario", "session_id": null }`
+    - **Response**: `{ "response": "Texto IA", "source_documents": [] }`
+

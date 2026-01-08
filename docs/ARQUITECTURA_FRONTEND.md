@@ -34,10 +34,10 @@ Cada carpeta aquí representa una funcionalidad clave. Mantiene unido todo lo re
 - **`dashboard/`**:
     - `components/`: `ActionCard` (las tarjetas de colores del diseño), `StatsWidget`.
 
-### 6. `lib/` o `services/`
-Configuración de clientes externos (API HTTP, WebSockets para el chat).
-- `apiClient.js`: Cliente axios/fetch configurado.
-- `theme.js`: Variables de diseño (colores, sombras) para mantener la elegancia y consistencia.
+### 6. `lib/` y `services/` (Capa de Conexión)
+Gestión de la comunicación con el Backend (API REST).
+- **`lib/api.js`**: Instancia de Axios configurada con la `baseURL` del backend (`http://localhost:8000/api`) y cabeceras por defecto. Actúa como cliente HTTP centralizado.
+- **`services/chatService.js`**: Capa de servicio que abstrae la lógica de llamadas a la API. Contiene el método `sendMessage` que conecta el componente visual con el endpoint `/chat`.
 
 ---
 
@@ -48,7 +48,12 @@ Configuración de clientes externos (API HTTP, WebSockets para el chat).
    - `MainLayout` renderiza `Sidebar` y el contenido hijo.
 3. **Contenido:** `DashboardPage` renderiza múltiples `ActionCard` (de `features/dashboard`).
    - Cada `ActionCard` usa componentes base como `Card` y `Icon` (de `components/ui`).
-4. **Interacción:** Al hacer clic en el chat, el `ChatInput` (de `features/chat`) utiliza un hook `useChat` para comunicarse con la API (`services/`).
+4. **Interacción (Chat):** 
+   - El usuario envía un mensaje en `ChatPage`.
+   - El componente activa un estado de carga visual (`isLoading`) mostrando una animación de espera.
+   - Invoca a `chatService.sendMessage(text)` de forma asíncrona.
+   - El servicio utiliza el cliente Axios (`lib/api.js`) para enviar un POST al Backend.
+   - Al recibir respuesta, se actualiza el estado local de mensajes y se hace scroll automático al final.
 
 ## Estilo Visual (Look & Feel)
 Para lograr el tono "elegante y llamativo pero no molesto":
