@@ -21,7 +21,10 @@ app.add_middleware(
 )
 
 # Incluir Routers
+from app.routers import documents
 app.include_router(chat_controller.router, prefix="/api", tags=["Chat"])
+app.include_router(documents.router, prefix="/api/documents", tags=["Documents"])
+
 
 @app.get("/")
 async def root():

@@ -2,10 +2,11 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Send, User, Bot, Loader2 } from 'lucide-react';
 import { Input } from '@/components/ui/Input';
 import { chatService } from '@/services/chatService';
+import { getFormById } from '@/components/features/forms/registry';
 
 export default function ChatPage() {
   const [messages, setMessages] = useState([
-    { id: 1, role: 'bot', text: 'Hello! How can I help you with your learning journey today?' }
+    { id: 1, role: 'bot', text: '¡Hola! Soy el asistente virtual del Registro Civil. ¿En qué puedo ayudarte hoy?' }
   ]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -30,17 +31,55 @@ export default function ChatPage() {
 
     try {
       const data = await chatService.sendMessage(userMessage);
-      setMessages(prev => [...prev, { id: Date.now() + 1, role: 'bot', text: data.response }]);
+      
+      // Detectar comandos especiales para formularios
+      // Ejemplo de respuesta n8n: "[FORMULARIO: REGISTRO_UEH] Por favor llene..."
+      const formMatch = data.response.match(/\[FORMULARIO:\s*(\w+)\]/);
+      let formId = null;
+      let cleanText = data.response;
+
+      if (formMatch) {
+        formId = formMatch[1];
+        cleanText = data.response.replace(formMatch[0], '').trim();
+      }
+
+      setMessages(prev => [...prev, { 
+        id: Date.now() + 1, 
+        role: 'bot', 
+        text: cleanText,
+        formId: formId 
+      }]);
+
     } catch (error) {
       console.error(error);
       setMessages(prev => [...prev, { 
         id: Date.now() + 1, 
         role: 'bot', 
-        text: 'Sorry, I am having trouble connecting to the server. Please check if the backend is running.' 
+        text: 'Error de conexión. Verifica que los servicios estén activos.' 
       }]);
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const renderMessageContent = (msg) => {
+    const FormComponent = msg.formId ? getFormById(msg.formId) : null;
+
+    return (
+      <div className="flex flex-col gap-2">
+        <p className="text-sm md:text-base leading-relaxed whitespace-pre-wrap">{msg.text}</p>
+        
+        {FormComponent && (
+          <div className="mt-4 p-2 bg-white rounded-lg text-gray-900 border border-gray-200 shadow-sm animate-in fade-in slide-in-from-bottom-4">
+             <FormComponent onSubmit={(successMsg) => {
+                setMessages(prev => [...prev, { id: Date.now(), role: 'bot', text: successMsg }]);
+             }} onCancel={() => {
+                setMessages(prev => [...prev, { id: Date.now(), role: 'user', text: "Cancelé el formulario." }]);
+             }} />
+          </div>
+        )}
+      </div>
+    );
   };
 
   return (
@@ -61,7 +100,7 @@ export default function ChatPage() {
                             ? 'bg-dark-800 rounded-tl-none text-gray-200 border border-white/5' 
                             : 'bg-primary-600 rounded-tr-none text-white'
                     }`}>
-                        <p className="text-sm md:text-base leading-relaxed whitespace-pre-wrap">{msg.text}</p>
+                        {renderMessageContent(msg)}
                     </div>
                 </div>
             ))}

@@ -9,12 +9,17 @@ class Settings(BaseSettings):
     # N8N Configuration
     N8N_WEBHOOK_URL: str
     
+    # Database Configuration
+    DATABASE_URL: str | None = None
+
     # CORS Configuration
     BACKEND_CORS_ORIGINS: list[str] = ["http://localhost:5173", "http://localhost:3000"]
 
     class Config:
         case_sensitive = True
         env_file = ".env"
+        extra = "ignore"  # Ignora variables extra en .env que no estén aquí definidas
+
 
 @lru_cache()
 def get_settings():
