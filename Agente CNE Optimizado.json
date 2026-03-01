@@ -1,0 +1,1507 @@
+{
+  "name": "Agente CNE Optimizado",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "64bb59fc-e0d5-4165-96ca-f59d1832648f",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        976,
+        1024
+      ],
+      "id": "e063b2f6-c8a8-4a54-a74d-e072db3ff73f",
+      "name": "Webhook",
+      "webhookId": "64bb59fc-e0d5-4165-96ca-f59d1832648f"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        2112,
+        1024
+      ],
+      "id": "7aa59fe3-6e28-4086-b906-2c3ef14485d8",
+      "name": "Respond to Webhook"
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-2.5-flash-lite",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        1536,
+        1248
+      ],
+      "id": "48d441b1-97f4-4790-b1bc-485df4b20bbf",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "dckeEFexdQHviwes",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const body = $('Webhook').item.json.body;\n\n// Para memoria persistente, el frontend DEBE enviar un sessionId constante\n// Si no viene, usamos userId, o generamos uno temporal (se perderá la memoria al refrescar)\nconst sessionId = body.sessionId || body.userId || ('anon_' + Date.now().toString());\n\nreturn {\n  json: {\n    sessionId: sessionId,\n    message: body.message,\n    queryContext: {\n       timestamp: new Date().toISOString(),\n       source: 'frontend-bot'\n    }\n  }\n}"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1200,
+        1024
+      ],
+      "id": "515251d0-1f9f-4a2d-ba41-17d7a79dc859",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "amount": 1
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        1424,
+        1024
+      ],
+      "id": "0dcab879-f85c-4e26-8bbc-300d8cb7e9e0",
+      "name": "Wait",
+      "webhookId": "7cf8a903-46d1-4d6c-a456-07f1fa862035"
+    },
+    {
+      "parameters": {
+        "content": "## Entrada de datos por peticion https\n\nSe ejecuta un codigo js que define un id de sesion para persistencia de datos y un nodo de espera o delay para a;adir un retraso fijo de 1 segundo para evitar el consumo de los tokens del agente de manera inmediata",
+        "height": 320,
+        "width": 576
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        960,
+        864
+      ],
+      "typeVersion": 1,
+      "id": "c05274e9-9abb-4f06-9b98-1af481b00d32",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "content": "## ⚠️ IMPORTANTE: MEMORIA\nActualmente usas 'Simple Memory' que olvida todo al terminar la respuesta.\n\nPara que el bot RECUERDE conversaciones pasadas:\n1. Reemplaza el nodo 'Simple Memory' con un nodo **'Postgres Chat Memory'**.\n2. Conéctalo a tu base de datos Postgres.\n3. Crea una tabla en tu DB llamada 'chat_history' con columnas (id, session_id, message).\n4. Configura el nodo para usar {{ $json.sessionId }} como Session ID.",
+        "height": 256,
+        "width": 544,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        960,
+        1216
+      ],
+      "typeVersion": 1,
+      "id": "004ee206-1c86-49be-ade1-ded3baf45415",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "content": "",
+        "width": 150,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        1504,
+        1216
+      ],
+      "typeVersion": 1,
+      "id": "7bc16819-341a-44cc-a9dd-b9b34f50dfa7",
+      "name": "Sticky Note2"
+    },
+    {
+      "parameters": {
+        "endpointUrl": "http://localhost:5678/mcp/23b7a77a-fc08-423e-9749-c14424f3b676",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.mcpClientTool",
+      "typeVersion": 1.2,
+      "position": [
+        1904,
+        1248
+      ],
+      "id": "9b458fc4-25ce-4d1f-9133-8f1490ff0529",
+      "name": "MCP Client"
+    },
+    {
+      "parameters": {
+        "schema": {
+          "__rl": true,
+          "value": "public",
+          "mode": "list",
+          "cachedResultName": "public"
+        },
+        "table": {
+          "__rl": true,
+          "value": "actaueh",
+          "mode": "list",
+          "cachedResultName": "actaueh"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "tienehijos": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('tienehijos', ``, 'boolean') }}",
+            "tieneapoderado": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('tieneapoderado', ``, 'boolean') }}",
+            "tienedocpublico": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('tienedocpublico', ``, 'boolean') }}",
+            "tienedecijudi": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('tienedecijudi', ``, 'boolean') }}",
+            "inutilizada": false,
+            "codestado": "=1",
+            "codof": "=10",
+            "nacta": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('nacta', ``, 'number') }}",
+            "ano": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('ano', ``, 'number') }}",
+            "tomo": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('tomo', ``, 'number') }}",
+            "cedular": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('cedular', ``, 'number') }}",
+            "idactaueh": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('idactaueh', ``, 'number') }}",
+            "tipolibro": "U",
+            "fechaacta": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('fechaacta', ``, 'string') }}",
+            "tipoacta": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('tipoacta', ``, 'string') }}",
+            "transcriptor": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('transcriptor', ``, 'number') }}",
+            "nresolucion": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('nresolucion', ``, 'string') }}",
+            "horamodificacion": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('horamodificacion', ``, 'string') }}",
+            "antigua": false
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "idactaueh",
+              "displayName": "idactaueh",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "codestado",
+              "displayName": "codestado",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "codof",
+              "displayName": "codof",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "nacta",
+              "displayName": "nacta",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "ano",
+              "displayName": "ano",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "tipolibro",
+              "displayName": "tipolibro",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "tomo",
+              "displayName": "tomo",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "fechaacta",
+              "displayName": "fechaacta",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "dateTime",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "tipoacta",
+              "displayName": "tipoacta",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "tienehijos",
+              "displayName": "tienehijos",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "boolean",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "tieneapoderado",
+              "displayName": "tieneapoderado",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "boolean",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "tienedocpublico",
+              "displayName": "tienedocpublico",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "boolean",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "tienedecijudi",
+              "displayName": "tienedecijudi",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "boolean",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "transcriptor",
+              "displayName": "transcriptor",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "cedular",
+              "displayName": "cedular",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "nresolucion",
+              "displayName": "nresolucion",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "inutilizada",
+              "displayName": "inutilizada",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "boolean",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "horamodificacion",
+              "displayName": "horamodificacion",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "dateTime",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "antigua",
+              "displayName": "antigua",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "boolean",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgresTool",
+      "typeVersion": 2.6,
+      "position": [
+        1424,
+        384
+      ],
+      "id": "f89acc5e-8f9e-4e31-996d-a52394559467",
+      "name": "Insertar acta",
+      "credentials": {
+        "postgres": {
+          "id": "MR2gTxlqmMjJ1LqP",
+          "name": "Cne"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "upsert",
+        "schema": {
+          "__rl": true,
+          "mode": "list",
+          "value": "public"
+        },
+        "table": {
+          "__rl": true,
+          "value": "actaueh",
+          "mode": "name"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "tienehijos": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('tienehijos', ``, 'boolean') }}",
+            "tieneapoderado": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('tieneapoderado', ``, 'boolean') }}",
+            "tienedocpublico": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('tienedocpublico', ``, 'boolean') }}",
+            "tienedecijudi": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('tienedecijudi', ``, 'boolean') }}",
+            "antigua": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('antigua', ``, 'boolean') }}",
+            "idactaueh": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('idactaueh__using_to_match_', ``, 'number') }}",
+            "nacta": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('nacta', ``, 'number') }}",
+            "ano": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('ano', ``, 'number') }}",
+            "tomo": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('tomo', ``, 'number') }}",
+            "transcriptor": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('transcriptor', ``, 'number') }}",
+            "cedular": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('cedular', ``, 'number') }}",
+            "codestado": 1,
+            "codof": 10,
+            "fechaacta": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('fechaacta', ``, 'string') }}",
+            "tipoacta": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('tipoacta', ``, 'string') }}",
+            "tipolibro": "U",
+            "nresolucion": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('nresolucion', ``, 'string') }}",
+            "horamodificacion": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('horamodificacion', ``, 'string') }}",
+            "inutilizada": false
+          },
+          "matchingColumns": [
+            "idactaueh"
+          ],
+          "schema": [
+            {
+              "id": "idactaueh",
+              "displayName": "idactaueh",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "codestado",
+              "displayName": "codestado",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "codof",
+              "displayName": "codof",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "nacta",
+              "displayName": "nacta",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "ano",
+              "displayName": "ano",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "tipolibro",
+              "displayName": "tipolibro",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "tomo",
+              "displayName": "tomo",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "fechaacta",
+              "displayName": "fechaacta",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "dateTime",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "tipoacta",
+              "displayName": "tipoacta",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "tienehijos",
+              "displayName": "tienehijos",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "boolean",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "tieneapoderado",
+              "displayName": "tieneapoderado",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "boolean",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "tienedocpublico",
+              "displayName": "tienedocpublico",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "boolean",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "tienedecijudi",
+              "displayName": "tienedecijudi",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "boolean",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "transcriptor",
+              "displayName": "transcriptor",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "cedular",
+              "displayName": "cedular",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "nresolucion",
+              "displayName": "nresolucion",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "inutilizada",
+              "displayName": "inutilizada",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "boolean",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "horamodificacion",
+              "displayName": "horamodificacion",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "dateTime",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "antigua",
+              "displayName": "antigua",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "boolean",
+              "canBeUsedToMatch": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgresTool",
+      "typeVersion": 2.6,
+      "position": [
+        1552,
+        384
+      ],
+      "id": "446d8b2c-fefc-4b99-a14c-626cb9b16d0e",
+      "name": "Actualizar acta",
+      "credentials": {
+        "postgres": {
+          "id": "MR2gTxlqmMjJ1LqP",
+          "name": "Cne"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "path": "23b7a77a-fc08-423e-9749-c14424f3b676"
+      },
+      "type": "@n8n/n8n-nodes-langchain.mcpTrigger",
+      "typeVersion": 2,
+      "position": [
+        1280,
+        176
+      ],
+      "id": "02a48192-ba8a-4ad0-a403-90163bdd2244",
+      "name": "Acta UEH",
+      "webhookId": "23b7a77a-fc08-423e-9749-c14424f3b676"
+    },
+    {
+      "parameters": {
+        "operation": "select",
+        "schema": {
+          "__rl": true,
+          "value": "public",
+          "mode": "list",
+          "cachedResultName": "public"
+        },
+        "table": {
+          "__rl": true,
+          "value": "actaueh",
+          "mode": "list",
+          "cachedResultName": "actaueh"
+        },
+        "returnAll": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Return_All', ``, 'boolean') }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgresTool",
+      "typeVersion": 2.6,
+      "position": [
+        1296,
+        384
+      ],
+      "id": "c8fcad42-68de-4334-99a0-02eb03d650a5",
+      "name": "Listar acta",
+      "credentials": {
+        "postgres": {
+          "id": "MR2gTxlqmMjJ1LqP",
+          "name": "Cne"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "{{ $fromAI('sql_statement') }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgresTool",
+      "typeVersion": 2.6,
+      "position": [
+        1984,
+        400
+      ],
+      "id": "534fa932-926d-48d3-9efe-6619465b5b9d",
+      "name": "Execute a SQL query in Postgres",
+      "credentials": {
+        "postgres": {
+          "id": "MR2gTxlqmMjJ1LqP",
+          "name": "Cne"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT table_name, column_name, data_type\nFROM information_schema.columns\nWHERE table_schema = 'public';",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgresTool",
+      "typeVersion": 2.6,
+      "position": [
+        1824,
+        400
+      ],
+      "id": "c3415e8e-e4b4-4e23-ad7b-54fdfde709c3",
+      "name": "Informacion shema",
+      "credentials": {
+        "postgres": {
+          "id": "MR2gTxlqmMjJ1LqP",
+          "name": "Cne"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## Acciones para acta ueh\n\nproceso de insertado actualizacion y listado de actas",
+        "width": 320
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        960,
+        368
+      ],
+      "typeVersion": 1,
+      "id": "dd70f388-b6a8-4bac-b49b-fd68aee3bc5d",
+      "name": "Sticky Note3"
+    },
+    {
+      "parameters": {
+        "content": "",
+        "width": 384
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        1280,
+        576
+      ],
+      "typeVersion": 1,
+      "id": "d66f381b-b8c9-40ae-821b-a52438285533",
+      "name": "Sticky Note4"
+    },
+    {
+      "parameters": {
+        "operation": "select",
+        "schema": {
+          "__rl": true,
+          "value": "public",
+          "mode": "list",
+          "cachedResultName": "public"
+        },
+        "table": {
+          "__rl": true,
+          "value": "unidosueh",
+          "mode": "list",
+          "cachedResultName": "unidosueh"
+        },
+        "returnAll": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Return_All', ``, 'boolean') }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgresTool",
+      "typeVersion": 2.6,
+      "position": [
+        1296,
+        592
+      ],
+      "id": "f33cbc35-151a-4003-82d8-bffad3c5fc27",
+      "name": "Listar unidos",
+      "credentials": {
+        "postgres": {
+          "id": "MR2gTxlqmMjJ1LqP",
+          "name": "Cne"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## Acciones para Unidos ueh\n\nproceso de insertado actualizacion y listado de actas",
+        "width": 320
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        960,
+        576
+      ],
+      "typeVersion": 1,
+      "id": "20cff486-50f8-4c46-8408-4f108a259ebe",
+      "name": "Sticky Note8"
+    },
+    {
+      "parameters": {
+        "schema": {
+          "__rl": true,
+          "value": "public",
+          "mode": "list",
+          "cachedResultName": "public"
+        },
+        "table": {
+          "__rl": true,
+          "value": "unidosueh",
+          "mode": "list",
+          "cachedResultName": "unidosueh"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "tipo": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('tipo', `H si es masculino M si es femenino`, 'string') }}",
+            "nombre1": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('nombre1', ``, 'string') }}",
+            "nombre2": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('nombre2', ``, 'string') }}",
+            "apellido1": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('apellido1', ``, 'string') }}",
+            "apellido2": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('apellido2', ``, 'string') }}",
+            "fechanac": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('fechanac', `fecha de hoy que se está haciendo el acta`, 'string') }}",
+            "numdocumento": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('numdocumento', ``, 'string') }}",
+            "tipodoc": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('tipodoc', ``, 'string') }}",
+            "paisnac": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('paisnac', ``, 'string') }}",
+            "estadonac": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('estadonac', ``, 'string') }}",
+            "municipionac": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('municipionac', ``, 'string') }}",
+            "parroquianac": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('parroquianac', ``, 'string') }}",
+            "nacionalidad": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('nacionalidad', ``, 'string') }}",
+            "edocivil": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('edocivil', ``, 'string') }}",
+            "profesion": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('profesion', ``, 'string') }}",
+            "direccion": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('direccion', ``, 'string') }}",
+            "idunidos": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('idunidos', ``, 'number') }}",
+            "idactaueh": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('idactaueh', `id del acta ueh original es la forany key `, 'number') }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "tipo",
+              "displayName": "tipo",
+              "required": true,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "nombre1",
+              "displayName": "nombre1",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "nombre2",
+              "displayName": "nombre2",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "apellido1",
+              "displayName": "apellido1",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "apellido2",
+              "displayName": "apellido2",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "fechanac",
+              "displayName": "fechanac",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "dateTime",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "numdocumento",
+              "displayName": "numdocumento",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "tipodoc",
+              "displayName": "tipodoc",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "paisnac",
+              "displayName": "paisnac",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "estadonac",
+              "displayName": "estadonac",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "municipionac",
+              "displayName": "municipionac",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "parroquianac",
+              "displayName": "parroquianac",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "nacionalidad",
+              "displayName": "nacionalidad",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "edocivil",
+              "displayName": "edocivil",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "profesion",
+              "displayName": "profesion",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "direccion",
+              "displayName": "direccion",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "idunidos",
+              "displayName": "idunidos",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "idactaueh",
+              "displayName": "idactaueh",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgresTool",
+      "typeVersion": 2.6,
+      "position": [
+        1424,
+        592
+      ],
+      "id": "0de0d1ec-4db7-47fd-b2eb-3fab009bb87b",
+      "name": "Insertar unidos",
+      "credentials": {
+        "postgres": {
+          "id": "MR2gTxlqmMjJ1LqP",
+          "name": "Cne"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "upsert",
+        "schema": {
+          "__rl": true,
+          "mode": "list",
+          "value": "public"
+        },
+        "table": {
+          "__rl": true,
+          "value": "unidosueh",
+          "mode": "list",
+          "cachedResultName": "unidosueh"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "idunidos": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('idunidos__using_to_match_', ``, 'number') }}",
+            "idactaueh": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('idactaueh', ``, 'number') }}",
+            "tipo": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('tipo', `H si es hombre M si es mujer`, 'string') }}",
+            "nombre1": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('nombre1', ``, 'string') }}",
+            "nombre2": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('nombre2', ``, 'string') }}",
+            "apellido1": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('apellido1', ``, 'string') }}",
+            "apellido2": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('apellido2', ``, 'string') }}",
+            "fechanac": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('fechanac', `fecha del acta de nacimiento`, 'string') }}",
+            "numdocumento": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('numdocumento', `cedula de identidad`, 'string') }}",
+            "tipodoc": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('tipodoc', ``, 'string') }}",
+            "paisnac": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('paisnac', ``, 'string') }}",
+            "estadonac": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('estadonac', ``, 'string') }}",
+            "municipionac": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('municipionac', ``, 'string') }}",
+            "parroquianac": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('parroquianac', ``, 'string') }}",
+            "nacionalidad": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('nacionalidad', ``, 'string') }}",
+            "edocivil": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('edocivil', ``, 'string') }}",
+            "profesion": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('profesion', ``, 'string') }}",
+            "direccion": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('direccion', ``, 'string') }}"
+          },
+          "matchingColumns": [
+            "idunidos"
+          ],
+          "schema": [
+            {
+              "id": "tipo",
+              "displayName": "tipo",
+              "required": true,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "nombre1",
+              "displayName": "nombre1",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "nombre2",
+              "displayName": "nombre2",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "apellido1",
+              "displayName": "apellido1",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "apellido2",
+              "displayName": "apellido2",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "fechanac",
+              "displayName": "fechanac",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "dateTime",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "numdocumento",
+              "displayName": "numdocumento",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "tipodoc",
+              "displayName": "tipodoc",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "paisnac",
+              "displayName": "paisnac",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "estadonac",
+              "displayName": "estadonac",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "municipionac",
+              "displayName": "municipionac",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "parroquianac",
+              "displayName": "parroquianac",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "nacionalidad",
+              "displayName": "nacionalidad",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "edocivil",
+              "displayName": "edocivil",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "profesion",
+              "displayName": "profesion",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "direccion",
+              "displayName": "direccion",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "idunidos",
+              "displayName": "idunidos",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "idactaueh",
+              "displayName": "idactaueh",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgresTool",
+      "typeVersion": 2.6,
+      "position": [
+        1552,
+        592
+      ],
+      "id": "1a477847-1033-48fb-9c5a-89528f79eaa8",
+      "name": "Actualizar unidos",
+      "credentials": {
+        "postgres": {
+          "id": "MR2gTxlqmMjJ1LqP",
+          "name": "Cne"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "",
+        "height": 192,
+        "width": 400,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        1760,
+        368
+      ],
+      "typeVersion": 1,
+      "id": "9ce48b0e-2bb4-4741-9778-d52cc9514996",
+      "name": "Sticky Note5"
+    },
+    {
+      "parameters": {
+        "content": "## Interaccion con base de datos \n\nse le pasa los datos del esquema de la base de datos para que tenga conocimiento general de las tablas y tambien un metodo de general consultas sql",
+        "height": 192,
+        "width": 320,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        2144,
+        368
+      ],
+      "typeVersion": 1,
+      "id": "6901d0a2-dc01-4248-a67f-2e4eb23c17ee",
+      "name": "Sticky Note6"
+    },
+    {
+      "parameters": {
+        "content": "",
+        "width": 384
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        1280,
+        368
+      ],
+      "typeVersion": 1,
+      "id": "fb064283-32fd-4e18-8700-bae978b1858c",
+      "name": "Sticky Note7"
+    },
+    {
+      "parameters": {
+        "tableName": "chat_history",
+        "contextWindowLength": 20
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryPostgresChat",
+      "typeVersion": 1.3,
+      "position": [
+        1728,
+        1248
+      ],
+      "id": "b31ae5c4-7e19-43e7-b9e9-5880c972e4f6",
+      "name": "Postgres Chat Memory",
+      "credentials": {
+        "postgres": {
+          "id": "n2RB9Tr7yrG1S0h6",
+          "name": "Postgres Historial de chats"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "toolDescription": "Usa esta herramienta para agendar una cita cuando tengas fecha, hora, nombre y email del usuario.",
+        "method": "POST",
+        "url": "http://localhost:8000/api/appointments/book",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"fecha\": \"{{$json.fecha}}\",\n  \"hora\": \"{{$json.hora}}\",\n  \"nombre\": \"{{$json.nombre}}\",\n  \"email\": \"{{$json.email}}\",\n  \"tipo_tramite\": \"UEH\"\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequestTool",
+      "typeVersion": 4.3,
+      "position": [
+        2048,
+        1248
+      ],
+      "id": "37cfe34b-9351-4825-b7a2-1a85fedc9100",
+      "name": "reservar_cita"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=BANNER DE SISTEMA / ROL:\nEres el Asistente Virtual Oficial del Registro Civil (Bot CNE).\nTu misión es gestionar trámites de Actas (Nacimiento, Unión Estable de Hecho, Matrimonio) con máxima precisión y profesionalismo.\n\nGESTIÓN DE CITAS:\nSi el usuario quiere una cita, pregúntale: Nombre completo, Email, Fecha deseada y Hora.\nUna vez tengas los datos, USA la herramienta 'reservar_cita'.\nNO confirmes la cita hasta que la herramienta responda \"éxito\".\nSi la herramienta devuelve error (ej. cupo lleno), díselo al usuario y pide otra hora.\nHorario de atención: Lunes a Viernes, 8:00 AM a 4:00 PM.\n\n\n\nINSTRUCCIONES DE COMPORTAMIENTO:\n1. **Identidad**: Eres un funcionario digital. Sé amable, directo e institucional.\n2. **Veracidad**: NUNCA inventes folios, tomos o fechas. Si no está en la base de datos, di \"No existe\". Usa tus herramientas DB para validar todo.\n3. **Memoria**: Recuerda el contexto de la conversación. Si el usuario te corrige un dato, actualiza tu búsqueda y reintenta inmediatamente.\n\nESTRUCTURA DE DATOS (CONOCIMIENTO):\nDebes navegar inteligentemente entre tres tablas clave:\n- **`solicitudes_ueh_web`**: Tabla TEMPORAL/WEB. Aquí llegan los registros nuevos que los usuarios hacen mediante el **Formulario Web** del chat. Si el usuario pregunta \"¿Ya se guardó mi registro de hoy?\", busca AQUÍ primero.\n- **`actaueh`**: Tabla OFICIAL de Actas. Contiene los documentos legales definitivos e históricos.\n- **`unidosueh`**: Tabla OFICIAL de Personas. Contiene los ciudadanos vinculados a las actas.\n\nPROTOCOLOS DE ACCIÓN:\n\nA. **REGISTRO DE UNIÓN ESTABLE DE HECHO (UEH):**\n   1. Antes de registrar, **BUSCA** en `unidosueh` o `actaueh` si las personas ya tienen un acta vigente para evitar duplicados.\n   2. Si no tienen registro previo y confirman su deseo de registrarse, **NO** pidas los datos uno por uno en el chat.\n   3. **ACCIÓN REQUERIDA**: Responde exactamente con el lanzador del formulario:\n      `[FORMULARIO: REGISTRO_UEH]`\n      *(Acompaña esto con una frase amable redirigiendo al usuario al formulario)*.\n\nB. **INSERCIÓN OFICIAL (Insertar Acta/Unidos):**\n   - Tienes capacidad técnica (Tools) para insertar directamente en `actaueh` y `unidosueh`. Úsala si:\n     a) Es un trámite de funcionario.\n     b) Necesitas corregir un dato específico.\n     c) El usuario insiste en dar los datos por chat en lugar del formulario.\n   - **Regla de integridad**: Al insertar un acta nueva en `actaueh`, verifica que los IDs de las personas existan en `unidosueh` primero (o créalos).\n\nC. **VALIDACIÓN Y CONSULTA:**\n   - Si buscan un acta antigua: Consulta `actaueh`.\n   - Si buscan un registro reciente hecho hace momentos: Consulta `solicitudes_ueh_web`.\n\nD. **GESTIÓN DE CITAS Y CALENDARIO:**\n   - El sistema gestiona citas automáticamente con un **límite de 50 por día**.\n   - Si el usuario solicita agendar una cita, **NO** pidas los datos uno por uno ni pidas confirmación por chat.\n   - Si el usuario solicita cita, infórmale que el sistema validará disponibilidad en Google Calendar.\n   - **ACCIÓN REQUERIDA**: Responde exactamente con el lanzador del formulario:\n\n`[FORMULARIO: AGENDAR_CITA]` \n*(Acompaña esto con una frase amable como: \\\"Claro, para agendar tu cita por favor completa el siguiente formulario\n\nE. **CONTEXTO DE TRÁMITES:**\n   - **UEH**: Requiere >2 años de convivencia, testigos y no estar casados.\n   - **Nacimiento**: Presentación hasta 90 días es ordinaria, luego extemporánea.\n   - **Defunción**: Requiere certificado médico y cédula.\n\nMANEJO DE ERRORES:\n- Si una búsqueda devuelve 0 resultados: \"No encontré registros en la tabla [NOMBRE_TABLA] con esos datos\". Ofrece buscar en otra tabla si tiene sentido.\n\nCONTEXTO TÉCNICO:\nSesión ID: {{ $json.sessionId }}\nMensaje actual: {{ $('Webhook').item.json.body.message }}\n",
+        "options": {
+          "systemMessage": "Eres el Bot CNE. Prioriza el uso del [FORMULARIO] para registros nuevos, pero usa tus tools de SQL para consultas oficiales."
+        }
+      },
+      "id": "47dc0015-0375-48c4-b177-c1d83a178531",
+      "name": "AI Agent Optimizado",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3,
+      "position": [
+        1680,
+        1024
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent Optimizado",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Wait",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait": {
+      "main": [
+        [
+          {
+            "node": "AI Agent Optimizado",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "MCP Client": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent Optimizado",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Insertar acta": {
+      "ai_tool": [
+        [
+          {
+            "node": "Acta UEH",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Actualizar acta": {
+      "ai_tool": [
+        [
+          {
+            "node": "Acta UEH",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Listar acta": {
+      "ai_tool": [
+        [
+          {
+            "node": "Acta UEH",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Execute a SQL query in Postgres": {
+      "ai_tool": [
+        [
+          {
+            "node": "Acta UEH",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Informacion shema": {
+      "ai_tool": [
+        [
+          {
+            "node": "Acta UEH",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Listar unidos": {
+      "ai_tool": [
+        [
+          {
+            "node": "Acta UEH",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Insertar unidos": {
+      "ai_tool": [
+        [
+          {
+            "node": "Acta UEH",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Actualizar unidos": {
+      "ai_tool": [
+        [
+          {
+            "node": "Acta UEH",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Postgres Chat Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent Optimizado",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "reservar_cita": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent Optimizado",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent Optimizado": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "cb8cafe3-f144-4492-8e86-3bcc3ef22f99",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "07914adfbc2b375cb6bdc1f86a3091317a4e21a5a89b92fbf9c7ff5ef5e6e336"
+  },
+  "id": "IcJr601rG9wPvbny",
+  "tags": []
+}

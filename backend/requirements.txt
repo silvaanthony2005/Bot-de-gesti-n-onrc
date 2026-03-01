@@ -4,3 +4,9 @@ httpx>=0.26.0
 python-dotenv>=1.0.1
 pydantic>=2.6.0
 pydantic-settings>=2.1.0
+fastapi-mail
+google-auth
+google-api-python-client
+sqlalchemy
+psycopg2-binary
+pytest
