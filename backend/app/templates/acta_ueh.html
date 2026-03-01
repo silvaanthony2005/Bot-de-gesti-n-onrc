@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>Acta UEH</title>
+<style type="text/css">
+  @page {
+      size: letter;
+      margin: 0.5cm;
+  }
+  body {
+      font-family: sans-serif; /* Gill Sans MT no suele estar en linux/servers, usaremos sans-serif genérico o Arial */
+      font-size: 11px;
+  }
+  /* Estilos específicos copiados y adaptados de la referencia */
+  .lineavertical { border-right:1px #000 solid; }
+  .lineavertical2 { border-left:1px #000 solid; }
+  .lineahorizontal { border-top:1px #000 solid; }
+  
+  .Estilo6 { 
+      font-weight: bold; 
+      font-size: 13px; /* Ajustado para visualización */
+  }
+  .Estilo8 { color: #FFFFFF; font-weight: bold; }
+  
+  .Estilo25 { 
+      font-size: 11px; 
+      font-weight: bold; 
+  }
+
+  /* 
+     Truco vital para simular bordes negros finos:
+     La tabla tiene fondo NEGRO (#000000).
+     Las celdas tienen fondo BLANCO (#FFFFFF).
+     Con cellspacing="1", se ve un borde negro de 1px entre celdas.
+  */
+  table.bordered-table {
+      width: 100%;
+      background-color: #000000;
+      border-spacing: 1px;
+      margin-bottom: 2px;
+  }
+  
+  table.bordered-table td {
+      background-color: #FFFFFF;
+      padding: 3px;
+      vertical-align: middle;
+  }
+
+  /* Tabla header sin bordes */
+  table.header-table {
+      width: 100%;
+      border: 0;
+  }
+  table.header-table td {
+      padding: 2px;
+      vertical-align: top;
+  }
+</style>
+</head>
+<body>
+
+<!-- ENCABEZADO -->
+<div style="text-align: center; margin-bottom: 10px;">
+    <span class="Estilo6">República Bolivariana de Venezuela<br />
+    Consejo Nacional Electoral<br />
+    Comisión de Registro Civil y Electoral</span>
+</div>
+
+<table class="header-table">
+  <tr>
+    <td width="35%">
+      <span class="Estilo6">Estado: {{ nombrestado }}</span><br/>
+      <span class="Estilo6">Municipio: {{ nombremunicipio }}</span><br/>
+      <span class="Estilo6">Parroquia: {{ nombreparroquia }}</span>
+    </td>
+    <td width="15%" align="center">
+       <!-- Ajustar ruta relativa a la carpeta de ejecución o absoluta -->
+       <img src="../static/images/logo.png" width="80" height="60" />
+    </td>
+    <td width="15%" align="center">
+       <img src="../static/images/sello.jpg" width="80" height="60" />
+    </td>
+    <td width="35%" align="right">
+      <span class="Estilo6">Acta Nº: {{ charnacta }}</span><br/>
+      <span class="Estilo6">Folio Nº: {{ folio }}</span><br/>
+      <span class="Estilo6">Día: {{ dia1 }}</span><br/>
+      <span class="Estilo6">Mes: {{ mes1 }}</span><br/>
+      <span class="Estilo6">Año: {{ ano1 }}</span>
+    </td>
+  </tr>
+</table>
+
+<div style="text-align: center; font-weight: bold; margin: 5px 0 10px 0;">
+    <span class="Estilo6">{{ tipoActa }}</span>
+</div>
+
+<!-- A. DATOS REGISTRADOR -->
+<table class="bordered-table">
+  <tr>
+    <td width="20" style="background-color: #000000; text-align:center;"><span class="Estilo8">A</span></td>
+    <td style="background-color: #D8D8D8;"><strong>Datos del Registrador(a) Civil:</strong></td>
+  </tr>
+</table>
+
+<table class="bordered-table">
+  <tr>
+    <td width="50%"><span class="Estilo25">NOMBRES: {{ nombre1r }} {{ nombre2r }}</span></td>
+    <td width="50%"><span class="Estilo25">APELLIDOS: {{ apellido1r }} {{ apellido2r }}</span></td>
+  </tr>
+</table>
+<table class="bordered-table">
+  <tr>
+    <td width="40%"><span class="Estilo25">DOCUMENTO DE IDENTIDAD: {{ cedula }}</span></td>
+    <td width="60%"><span class="Estilo25">OFICINA O UNIDAD DE REGISTRO CIVIL: {{ nombreuh }}</span></td>
+  </tr>
+</table>
+<table class="bordered-table">
+  <tr>
+    <td width="25%"><span class="Estilo25">RESOLUCIÓN Nº: {{ nresolucion }}</span></td>
+    <td width="15%"><span class="Estilo25">FECHA: {{ fecharesolucion }}</span></td>
+    <td width="35%"><span class="Estilo25">GACETA: Nº {{ ngacetamunicipal }} {{ tipogaceta }}</span></td>
+    <td width="25%"><span class="Estilo25">FECHA: {{ fechagacetamunicipal }}</span></td>
+  </tr>
+</table>
+
+<!-- B. DATOS UNIDO DE HECHO -->
+<table class="bordered-table">
+  <tr>
+    <td width="20" style="background-color: #000000; text-align:center;"><span class="Estilo8">B</span></td>
+    <td style="background-color: #D8D8D8;"><strong>Datos del Unido de Hecho:</strong></td>
+  </tr>
+</table>
+<table class="bordered-table">
+  <tr>
+    <td width="50%"><span class="Estilo25">NOMBRES: {{ nombre1Unido }} {{ nombre2Unido }}</span></td>
+    <td width="50%"><span class="Estilo25">APELLIDOS: {{ apellido1Unido }} {{ apellido2Unido }}</span></td>
+  </tr>
+</table>
+<table class="bordered-table">
+  <tr>
+    <td width="25%"><span class="Estilo25">FECHA DE NACIMIENTO: {{ fechaNacUnido }}</span></td>
+    <td width="10%"><span class="Estilo25">EDAD: {{ edadUnido }}</span></td>
+    <td width="40%"><span class="Estilo25">DOCUMENTO DE IDENTIDAD Nº: {{ numDocumentoUnido }}</span></td>
+    <td width="25%"><span class="Estilo25">{{ tipoDocUnido }}</span></td>
+  </tr>
+</table>
+<table class="bordered-table">
+  <tr>
+    <td width="15%"><span class="Estilo25">LUGAR DE NACIMIENTO</span></td>
+    <td width="15%"><span class="Estilo25">{{ etiquetaPais }} {{ paisNacUnido }}</span></td>
+    <td width="15%"><span class="Estilo25">{{ etiquetaEstado }} {{ estadoNacUnido }}</span></td>
+    <td width="15%"><span class="Estilo25">{{ etiquetaMunicipio }} {{ municipioNacUnido }}</span></td>
+    <td width="15%"><span class="Estilo25">{{ etiquetaParroquia }} {{ parroquiaNacUnido }}</span></td>
+    <td width="25%"><span class="Estilo25">NACIONALIDAD: {{ nacionalidadUnido }}</span></td>
+  </tr>
+</table>
+<table class="bordered-table">
+  <tr>
+    <td width="40%"><span class="Estilo25">ESTADO CIVIL: {{ edoCivilUnido }}</span></td>
+    <td width="60%"><span class="Estilo25">PROFESIÓN U OCUPACIÓN: {{ profesionUnido }}</span></td>
+  </tr>
+</table>
+<table class="bordered-table">
+  <tr>
+    <td width="100%"><span class="Estilo25">RESIDENCIA: {{ direccionUnido }}</span></td>
+  </tr>
+</table>
+
+<!-- C. DATOS UNIDA DE HECHO -->
+<table class="bordered-table">
+  <tr>
+    <td width="20" style="background-color: #000000; text-align:center;"><span class="Estilo8">C</span></td>
+    <td style="background-color: #D8D8D8;"><strong>Datos del Unida de Hecho:</strong></td>
+  </tr>
+</table>
+<table class="bordered-table">
+  <tr>
+    <td width="50%"><span class="Estilo25">NOMBRES: {{ nombre1Unida }} {{ nombre2Unida }}</span></td>
+    <td width="50%"><span class="Estilo25">APELLIDOS: {{ apellido1Unida }} {{ apellido2Unida }}</span></td>
+  </tr>
+</table>
+<table class="bordered-table">
+  <tr>
+    <td width="25%"><span class="Estilo25">FECHA DE NACIMIENTO: {{ fechaNacUnida }}</span></td>
+    <td width="10%"><span class="Estilo25">EDAD: {{ edadUnida }}</span></td>
+    <td width="40%"><span class="Estilo25">DOCUMENTO DE IDENTIDAD Nº: {{ numDocumentoUnida }}</span></td>
+    <td width="25%"><span class="Estilo25">{{ tipoDocUnida }}</span></td>
+  </tr>
+</table>
+<table class="bordered-table">
+  <tr>
+    <td width="15%"><span class="Estilo25">LUGAR DE NACIMIENTO</span></td>
+    <td width="15%"><span class="Estilo25">{{ etiquetaPais1 }} {{ paisNacUnida }}</span></td>
+    <td width="15%"><span class="Estilo25">{{ etiquetaEstado1 }} {{ estadoNacUnida }}</span></td>
+    <td width="15%"><span class="Estilo25">{{ etiquetaMunicipio1 }} {{ municipioNacUnida }}</span></td>
+    <td width="15%"><span class="Estilo25">{{ etiquetaParroquia1 }} {{ parroquiaNacUnida }}</span></td>
+    <td width="25%"><span class="Estilo25">NACIONALIDAD: {{ nacionalidadUnida }}</span></td>
+  </tr>
+</table>
+<table class="bordered-table">
+  <tr>
+    <td width="40%"><span class="Estilo25">ESTADO CIVIL: {{ edoCivilUnida }}</span></td>
+    <td width="60%"><span class="Estilo25">PROFESIÓN U OCUPACIÓN: {{ profesionUnida }}</span></td>
+  </tr>
+</table>
+<table class="bordered-table">
+  <tr>
+    <td width="100%"><span class="Estilo25">RESIDENCIA: {{ direccionUnida }}</span></td>
+  </tr>
+</table>
+
+<!-- D. MANIFESTACION -->
+<table class="bordered-table">
+  <tr>
+    <td width="20" style="background-color: #000000; text-align:center;"><span class="Estilo8">D</span></td>
+    <td style="background-color: #D8D8D8;"><strong>Manifestación expresa</strong></td>
+  </tr>
+</table>
+<table class="bordered-table">
+  <tr>
+    <td><span class="Estilo25">Los declarantes manifiestan que tienen una Unión Estable de Hecho aproximadamente desde: {{ fechaManis }}</span></td>
+  </tr>
+</table>
+
+<!-- E. HIJOS -->
+{% if tablaHijos %}
+  {{ tablaHijos|safe }}
+{% endif %}
+
+<!-- F. TESTIGOS -->
+<table class="bordered-table">
+  <tr>
+    <td width="20" style="background-color: #000000; text-align:center;"><span class="Estilo8">F</span></td>
+    <td style="background-color: #D8D8D8;"><strong>Datos de los Testigos</strong></td>
+  </tr>
+</table>
+
+<!-- Testigo 1 -->
+<table class="bordered-table">
+  <tr>
+    <td width="50%"><span class="Estilo25">NOMBRES: {{ nombresTestigo1 }}</span></td>
+    <td width="50%"><span class="Estilo25">APELLIDOS: {{ apellidosTestigo1 }}</span></td>
+  </tr>
+</table>
+<table class="bordered-table">
+  <tr>
+    <td width="25%"><span class="Estilo25">{{ tipoDocTestigo1 }}: {{ docidentidadTestigo1 }}</span></td>
+    <td width="10%"><span class="Estilo25">EDAD: {{ edadTestigo1 }}</span></td>
+    <td width="40%"><span class="Estilo25">PROFESIÓN U OCUPACIÓN: {{ profesionTestigo1 }}</span></td>
+    <td width="25%"><span class="Estilo25">NACIONALIDAD: {{ nacionalidadTestigo1 }}</span></td>
+  </tr>
+  <tr>
+    <td colspan="4"><span class="Estilo25">RESIDENCIA: {{ direccionTestigo1 }}</span></td>
+  </tr>
+</table>
+
+<!-- Testigo 2 -->
+<div style="height: 2px;"></div>
+<table class="bordered-table">
+  <tr>
+    <td width="50%"><span class="Estilo25">NOMBRES: {{ nombresTestigo2 }}</span></td>
+    <td width="50%"><span class="Estilo25">APELLIDOS: {{ apellidosTestigo2 }}</span></td>
+  </tr>
+</table>
+<table class="bordered-table">
+  <tr>
+    <td width="25%"><span class="Estilo25">{{ tipoDocTestigo2 }}: {{ docidentidadTestigo2 }}</span></td>
+    <td width="10%"><span class="Estilo25">EDAD: {{ edadTestigo2 }}</span></td>
+    <td width="40%"><span class="Estilo25">PROFESIÓN U OCUPACIÓN: {{ profesionTestigo2 }}</span></td>
+    <td width="25%"><span class="Estilo25">NACIONALIDAD: {{ nacionalidadTestigo2 }}</span></td>
+  </tr>
+  <tr>
+    <td colspan="4"><span class="Estilo25">RESIDENCIA: {{ direccionTestigo2 }}</span></td>
+  </tr>
+</table>
+
+<!-- FIRMAS -->
+<br/><br/><br/>
+<table style="width: 100%; text-align: center; border: 0;">
+    <tr>
+        <td width="50%" align="center">
+            __________________________<br/>
+            <span class="Estilo25">{{ nombre1Unido }} {{ apellido1Unido }}<br/>(Firma Unido)</span>
+        </td>
+        <td width="50%" align="center">
+            __________________________<br/>
+            <span class="Estilo25">{{ nombre1Unida }} {{ apellido1Unida }}<br/>(Firma Unida)</span>
+        </td>
+    </tr>
+    <tr>
+        <td colspan="2" style="height: 40px;">&nbsp;</td>
+    </tr>
+    <tr>
+        <td colspan="2" align="center">
+            __________________________<br/>
+            <span class="Estilo25">{{ nombre1r }} {{ apellido1r }}<br/>Registrador(a) Civil</span>
+        </td>
+    </tr>
+</table>
+
+</body>
+</html>
