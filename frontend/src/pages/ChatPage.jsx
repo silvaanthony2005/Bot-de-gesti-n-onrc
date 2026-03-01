@@ -3,14 +3,28 @@ import { Send, User, Bot, Loader2 } from 'lucide-react';
 import { Input } from '@/components/ui/Input';
 import { chatService } from '@/services/chatService';
 import { getFormById } from '@/components/features/forms/registry';
+import { useLocation } from 'react-router-dom';
 
 export default function ChatPage() {
+  const location = useLocation();
   const [messages, setMessages] = useState([
     { id: 1, role: 'bot', text: '¡Hola! Soy el asistente virtual del Registro Civil. ¿En qué puedo ayudarte hoy?' }
   ]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef(null);
+
+  const hasSentInitialPrompt = useRef(false);
+
+  // Efecto para manejar el prompt inicial desde el Dashboard
+  useEffect(() => {
+    if (location.state?.initialPrompt && !hasSentInitialPrompt.current) {
+      hasSentInitialPrompt.current = true;
+      sendMessage(location.state.initialPrompt);
+      // Limpiar el estado para evitar repeticiones
+      window.history.replaceState({}, document.title);
+    }
+  }, [location.state]);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -20,20 +34,15 @@ export default function ChatPage() {
     scrollToBottom();
   }, [messages, isLoading]);
 
-  const handleSend = async (e) => {
-    e.preventDefault();
-    if (!input.trim() || isLoading) return;
+  const sendMessage = async (text) => {
+    if (!text.trim() || isLoading) return;
 
-    const userMessage = input.trim();
-    setMessages(prev => [...prev, { id: Date.now(), role: 'user', text: userMessage }]);
-    setInput('');
+    setMessages(prev => [...prev, { id: Date.now(), role: 'user', text: text.trim() }]);
     setIsLoading(true);
 
     try {
-      const data = await chatService.sendMessage(userMessage);
+      const data = await chatService.sendMessage(text);
       
-      // Detectar comandos especiales para formularios
-      // Ejemplo de respuesta n8n: "[FORMULARIO: REGISTRO_UEH] Por favor llene..."
       const formMatch = data.response.match(/\[FORMULARIO:\s*(\w+)\]/);
       let formId = null;
       let cleanText = data.response;
@@ -60,6 +69,14 @@ export default function ChatPage() {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const handleSend = async (e) => {
+    e.preventDefault();
+    if (!input.trim() || isLoading) return;
+    const userMessage = input.trim();
+    setInput('');
+    await sendMessage(userMessage);
   };
 
   const renderMessageContent = (msg) => {
