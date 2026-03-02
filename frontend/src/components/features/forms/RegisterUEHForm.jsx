@@ -1,28 +1,58 @@
 import React, { useState } from 'react';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
-import { Input } from '@/components/ui/Input';
+
+const Field = ({ label, ...props }) => (
+  <label className="flex flex-col gap-1 text-sm text-slate-700">
+    <span className="font-medium text-slate-600">{label}</span>
+    <input
+      {...props}
+      className="w-full bg-transparent border-0 border-b border-slate-300 px-0 py-2 text-slate-900 placeholder:text-slate-400 focus:border-indigo-600 focus:ring-0 outline-none"
+    />
+  </label>
+);
+
+const SelectField = ({ label, children, ...props }) => (
+  <label className="flex flex-col gap-1 text-sm text-slate-700">
+    <span className="font-medium text-slate-600">{label}</span>
+    <select
+      {...props}
+      className="w-full bg-transparent border-0 border-b border-slate-300 px-0 py-2 text-slate-900 focus:border-indigo-600 focus:ring-0 outline-none"
+    >
+      {children}
+    </select>
+  </label>
+);
 
 const RegisterUEHForm = ({ onSubmit, onCancel }) => {
   const [step, setStep] = useState(1);
   const [formData, setFormData] = useState({
+    tipoActa: '',
     // Registrador
     nombre1r: "Registrador", apellido1r: "Principal", cedula: "V-999999", 
     nombreuh: "Registro Civil San Cristóbal",
 
     // Unido 1
-    nombre1Unido: '', apellido1Unido: '', numDocumentoUnido: '',
+    nombre1Unido: '', nombre2Unido: '', apellido1Unido: '', apellido2Unido: '', numDocumentoUnido: '',
+    tipoDocUnido: 'CEDULA',
     fechaNacUnido: '', edadUnido: '', nacionalidadUnido: 'Venezolano',
+    paisNacUnido: 'Venezuela',
+    edoCivilUnido: '',
     profesionUnido: '', direccionUnido: '',
+    estadoNacUnido: '', municipioNacUnido: '',
 
     // Unida 2
-    nombre1Unida: '', apellido1Unida: '', numDocumentoUnida: '',
+    nombre1Unida: '', nombre2Unida: '', apellido1Unida: '', apellido2Unida: '', numDocumentoUnida: '',
+    tipoDocUnida: 'CEDULA',
     fechaNacUnida: '', edadUnida: '', nacionalidadUnida: 'Venezolana',
+    paisNacUnida: 'Venezuela',
+    edoCivilUnida: '',
     profesionUnida: '', direccionUnida: '',
+    estadoNacUnida: '', municipioNacUnida: '',
 
     // Testigos
-    nombresTestigo1: '', apellidosTestigo1: '', docidentidadTestigo1: '',
-    nombresTestigo2: '', apellidosTestigo2: '', docidentidadTestigo2: '',
+    nombresTestigo1: '', apellidosTestigo1: '', tipoDocTestigo1: 'CEDULA', docidentidadTestigo1: '', edadTestigo1: '', nacionalidadTestigo1: '', profesionTestigo1: '',
+    nombresTestigo2: '', apellidosTestigo2: '', tipoDocTestigo2: 'CEDULA', docidentidadTestigo2: '', edadTestigo2: '', nacionalidadTestigo2: '', profesionTestigo2: '',
     
     // Meta
     nombrestado: "Táchira", nombremunicipio: "San Cristóbal", nombreparroquia: "La Concordia"
@@ -32,21 +62,15 @@ const RegisterUEHForm = ({ onSubmit, onCancel }) => {
   const [pdfUrl, setPdfUrl] = useState(null);
 
   const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    setFormData({ ...formData, [name]: value });
   };
 
   const nextStep = () => setStep(step + 1);
   const prevStep = () => setStep(step - 1);
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    
-    // Prevenir envío accidental con Enter si no estamos en el último paso
-    if (step < 3) {
-      nextStep();
-      return;
-    }
-
+  const handleSubmit = async () => {
+    if (step !== 3) return;
     setLoading(true);
     try {
       const response = await fetch('http://localhost:8000/api/documents/generate-ueh', {
@@ -83,69 +107,148 @@ const RegisterUEHForm = ({ onSubmit, onCancel }) => {
   }
 
   return (
-    <Card className="p-4 w-full max-w-2xl mx-auto bg-white shadow-lg mt-4 text-gray-800">
-      <h3 className="text-lg font-bold mb-4 text-blue-900 border-b pb-2">
-        Registro Civil - Unión Estable de Hecho (Paso {step}/3)
+    <Card className="p-5 md:p-6 w-full max-w-4xl mx-auto bg-white border border-slate-200 shadow-sm mt-4 text-slate-800 rounded-2xl">
+      <h3 className="text-xl font-semibold mb-5 text-slate-900 border-b border-slate-200 pb-3">
+        Registro Civil - INSERCION DE ACTAS (Paso {step}/3)
       </h3>
-      <form onSubmit={handleSubmit} className="space-y-4">
+      <form
+        onKeyDown={(e) => {
+          if (e.key === 'Enter') {
+            e.preventDefault();
+          }
+        }}
+        className="space-y-4"
+      >
         
         {/* PASO 1: UNIDO DE HECHO */}
         {step === 1 && (
-          <div className="space-y-3 animation-fade-in">
-            <h4 className="font-semibold text-blue-700 bg-blue-50 p-2 rounded">Datos del Primer Declarante</h4>
-            <div className="grid grid-cols-2 gap-3">
-              <Input name="nombre1Unido" placeholder="Nombres" required onChange={handleChange} value={formData.nombre1Unido} />
-              <Input name="apellido1Unido" placeholder="Apellidos" required onChange={handleChange} value={formData.apellido1Unido} />
-              <Input name="numDocumentoUnido" placeholder="Cédula" required onChange={handleChange} value={formData.numDocumentoUnido} />
-              <Input name="fechaNacUnido" type="date" placeholder="Fecha Nacimiento" required onChange={handleChange} value={formData.fechaNacUnido} />
-              <Input name="edadUnido" placeholder="Edad" type="number" onChange={handleChange} value={formData.edadUnido} />
-              <Input name="nacionalidadUnido" placeholder="Nacionalidad" onChange={handleChange} value={formData.nacionalidadUnido} />
-              <Input name="profesionUnido" placeholder="Profesión" onChange={handleChange} value={formData.profesionUnido} />
-              <Input name="direccionUnido" placeholder="Dirección de Residencia" className="col-span-2" onChange={handleChange} value={formData.direccionUnido} />
+          <div className="space-y-5 animation-fade-in">
+            <div className="rounded-xl border border-slate-200 p-4">
+              <h4 className="font-semibold text-slate-800 mb-3">Tipo de Acta</h4>
+              <SelectField
+                label="Trámite"
+              name="tipoActa"
+              required
+              onChange={handleChange}
+              value={formData.tipoActa}
+            >
+              <option value="">Seleccionar tipo de acta</option>
+              <option value="UNION ESTABLE">UNION ESTABLE</option>
+              <option value="DEFUNCION">DEFUNCION</option>
+              <option value="NACIONALIDAD">NACIONALIDAD</option>
+              <option value="NACIMIENTO">NACIMIENTO</option>
+              <option value="CAPACIDAD">CAPACIDAD</option>
+              <option value="MATRIMONIO">MATRIMONIO</option>
+              </SelectField>
+            </div>
+
+            <div className="rounded-xl border border-slate-200 p-4">
+              <h4 className="font-semibold text-slate-800 mb-3">Ubicación del Acta</h4>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <Field label="Estado" name="nombrestado" placeholder="Ej: Táchira" required onChange={handleChange} value={formData.nombrestado} />
+                <Field label="Municipio" name="nombremunicipio" placeholder="Ej: San Cristóbal" required onChange={handleChange} value={formData.nombremunicipio} />
+                <Field label="Parroquia" name="nombreparroquia" placeholder="Ej: La Concordia" required onChange={handleChange} value={formData.nombreparroquia} />
+              </div>
+            </div>
+
+            <div className="rounded-xl border border-slate-200 p-4">
+              <h4 className="font-semibold text-slate-800 mb-3">Datos del Primer Declarante</h4>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <Field label="Primer Nombre" name="nombre1Unido" placeholder="Nombres" required onChange={handleChange} value={formData.nombre1Unido} />
+                <Field label="Segundo Nombre" name="nombre2Unido" placeholder="Segundo nombre" onChange={handleChange} value={formData.nombre2Unido} />
+                <Field label="Primer Apellido" name="apellido1Unido" placeholder="Apellidos" required onChange={handleChange} value={formData.apellido1Unido} />
+                <Field label="Segundo Apellido" name="apellido2Unido" placeholder="Segundo apellido" onChange={handleChange} value={formData.apellido2Unido} />
+                <Field label="Documento" name="numDocumentoUnido" placeholder="Cédula o pasaporte" required onChange={handleChange} value={formData.numDocumentoUnido} />
+                <SelectField label="Tipo de Documento" name="tipoDocUnido" required onChange={handleChange} value={formData.tipoDocUnido}>
+                  <option value="CEDULA">CÉDULA</option>
+                  <option value="PASAPORTE">PASAPORTE</option>
+                </SelectField>
+                <Field label="Fecha de Nacimiento" name="fechaNacUnido" type="date" required onChange={handleChange} value={formData.fechaNacUnido} />
+                <Field label="Edad" name="edadUnido" placeholder="Edad" type="number" onChange={handleChange} value={formData.edadUnido} />
+                <Field label="Nacionalidad" name="nacionalidadUnido" placeholder="Nacionalidad" onChange={handleChange} value={formData.nacionalidadUnido} />
+                <Field label="País de Nacimiento" name="paisNacUnido" placeholder="Ej: Venezuela" onChange={handleChange} value={formData.paisNacUnido} />
+                <Field label="Estado Civil" name="edoCivilUnido" placeholder="Ej: Soltero(a)" onChange={handleChange} value={formData.edoCivilUnido} />
+                <Field label="Profesión" name="profesionUnido" placeholder="Profesión" onChange={handleChange} value={formData.profesionUnido} />
+                <Field label="Estado de Nacimiento" name="estadoNacUnido" placeholder="Estado" onChange={handleChange} value={formData.estadoNacUnido} />
+                <Field label="Municipio de Nacimiento" name="municipioNacUnido" placeholder="Municipio" onChange={handleChange} value={formData.municipioNacUnido} />
+                <div className="md:col-span-2">
+                  <Field label="Dirección de Residencia" name="direccionUnido" placeholder="Dirección" onChange={handleChange} value={formData.direccionUnido} />
+                </div>
+              </div>
             </div>
           </div>
         )}
 
         {/* PASO 2: UNIDA DE HECHO */}
         {step === 2 && (
-          <div className="space-y-3 animation-fade-in">
-            <h4 className="font-semibold text-pink-700 bg-pink-50 p-2 rounded">Datos del Segundo Declarante</h4>
-            <div className="grid grid-cols-2 gap-3">
-              <Input name="nombre1Unida" placeholder="Nombres" required onChange={handleChange} value={formData.nombre1Unida} />
-              <Input name="apellido1Unida" placeholder="Apellidos" required onChange={handleChange} value={formData.apellido1Unida} />
-              <Input name="numDocumentoUnida" placeholder="Cédula" required onChange={handleChange} value={formData.numDocumentoUnida} />
-              <Input name="fechaNacUnida" type="date" placeholder="Fecha Nacimiento" required onChange={handleChange} value={formData.fechaNacUnida} />
-              <Input name="edadUnida" placeholder="Edad" type="number" onChange={handleChange} value={formData.edadUnida} />
-              <Input name="nacionalidadUnida" placeholder="Nacionalidad" onChange={handleChange} value={formData.nacionalidadUnida} />
-              <Input name="profesionUnida" placeholder="Profesión" onChange={handleChange} value={formData.profesionUnida} />
-              <Input name="direccionUnida" placeholder="Dirección de Residencia" className="col-span-2" onChange={handleChange} value={formData.direccionUnida} />
+          <div className="space-y-5 animation-fade-in">
+            <div className="rounded-xl border border-slate-200 p-4">
+              <h4 className="font-semibold text-slate-800 mb-3">Datos del Segundo Declarante</h4>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <Field label="Primer Nombre" name="nombre1Unida" placeholder="Nombres" required onChange={handleChange} value={formData.nombre1Unida} />
+                <Field label="Segundo Nombre" name="nombre2Unida" placeholder="Segundo nombre" onChange={handleChange} value={formData.nombre2Unida} />
+                <Field label="Primer Apellido" name="apellido1Unida" placeholder="Apellidos" required onChange={handleChange} value={formData.apellido1Unida} />
+                <Field label="Segundo Apellido" name="apellido2Unida" placeholder="Segundo apellido" onChange={handleChange} value={formData.apellido2Unida} />
+                <Field label="Documento" name="numDocumentoUnida" placeholder="Cédula o pasaporte" required onChange={handleChange} value={formData.numDocumentoUnida} />
+                <SelectField label="Tipo de Documento" name="tipoDocUnida" required onChange={handleChange} value={formData.tipoDocUnida}>
+                  <option value="CEDULA">CÉDULA</option>
+                  <option value="PASAPORTE">PASAPORTE</option>
+                </SelectField>
+                <Field label="Fecha de Nacimiento" name="fechaNacUnida" type="date" required onChange={handleChange} value={formData.fechaNacUnida} />
+                <Field label="Edad" name="edadUnida" placeholder="Edad" type="number" onChange={handleChange} value={formData.edadUnida} />
+                <Field label="Nacionalidad" name="nacionalidadUnida" placeholder="Nacionalidad" onChange={handleChange} value={formData.nacionalidadUnida} />
+                <Field label="País de Nacimiento" name="paisNacUnida" placeholder="Ej: Venezuela" onChange={handleChange} value={formData.paisNacUnida} />
+                <Field label="Estado Civil" name="edoCivilUnida" placeholder="Ej: Soltero(a)" onChange={handleChange} value={formData.edoCivilUnida} />
+                <Field label="Profesión" name="profesionUnida" placeholder="Profesión" onChange={handleChange} value={formData.profesionUnida} />
+                <Field label="Estado de Nacimiento" name="estadoNacUnida" placeholder="Estado" onChange={handleChange} value={formData.estadoNacUnida} />
+                <Field label="Municipio de Nacimiento" name="municipioNacUnida" placeholder="Municipio" onChange={handleChange} value={formData.municipioNacUnida} />
+                <div className="md:col-span-2">
+                  <Field label="Dirección de Residencia" name="direccionUnida" placeholder="Dirección" onChange={handleChange} value={formData.direccionUnida} />
+                </div>
+              </div>
             </div>
           </div>
         )}
 
         {/* PASO 3: TESTIGOS Y FINALIZAR */}
         {step === 3 && (
-          <div className="space-y-3 animation-fade-in">
-            <h4 className="font-semibold text-gray-700 bg-gray-50 p-2 rounded">Datos de Testigos</h4>
+           <div className="space-y-5 animation-fade-in">
+            <div className="rounded-xl border border-slate-200 p-4">
+            <h4 className="font-semibold text-slate-800 mb-3">Datos de Testigos</h4>
             
-            <p className="text-xs font-bold uppercase text-gray-500">Testigo 1</p>
-            <div className="grid grid-cols-2 gap-2">
-               <Input name="nombresTestigo1" placeholder="Nombres" onChange={handleChange} value={formData.nombresTestigo1} />
-               <Input name="apellidosTestigo1" placeholder="Apellidos" onChange={handleChange} value={formData.apellidosTestigo1} />
-               <Input name="docidentidadTestigo1" placeholder="Cédula" onChange={handleChange} value={formData.docidentidadTestigo1} />
-               <Input name="direccionTestigo1" placeholder="Dirección" onChange={handleChange} value={formData.direccionTestigo1} />
+            <p className="text-xs font-semibold uppercase text-slate-500">Testigo 1</p>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <Field label="Nombres" name="nombresTestigo1" placeholder="Nombres" onChange={handleChange} value={formData.nombresTestigo1} />
+              <Field label="Apellidos" name="apellidosTestigo1" placeholder="Apellidos" onChange={handleChange} value={formData.apellidosTestigo1} />
+              <SelectField label="Tipo de Documento" name="tipoDocTestigo1" onChange={handleChange} value={formData.tipoDocTestigo1}>
+                <option value="CEDULA">CÉDULA</option>
+                <option value="PASAPORTE">PASAPORTE</option>
+              </SelectField>
+              <Field label="Documento" name="docidentidadTestigo1" placeholder="Cédula" onChange={handleChange} value={formData.docidentidadTestigo1} />
+              <Field label="Edad" name="edadTestigo1" placeholder="Edad" type="number" onChange={handleChange} value={formData.edadTestigo1} />
+              <Field label="Nacionalidad" name="nacionalidadTestigo1" placeholder="Nacionalidad" onChange={handleChange} value={formData.nacionalidadTestigo1} />
+              <Field label="Profesión" name="profesionTestigo1" placeholder="Profesión" onChange={handleChange} value={formData.profesionTestigo1} />
+              <Field label="Dirección" name="direccionTestigo1" placeholder="Dirección" onChange={handleChange} value={formData.direccionTestigo1} />
             </div>
 
-            <p className="text-xs font-bold uppercase text-gray-500 mt-2">Testigo 2</p>
-            <div className="grid grid-cols-2 gap-2">
-               <Input name="nombresTestigo2" placeholder="Nombres" onChange={handleChange} value={formData.nombresTestigo2} />
-               <Input name="apellidosTestigo2" placeholder="Apellidos" onChange={handleChange} value={formData.apellidosTestigo2} />
-               <Input name="docidentidadTestigo2" placeholder="Cédula" onChange={handleChange} value={formData.docidentidadTestigo2} />
-               <Input name="direccionTestigo2" placeholder="Dirección" onChange={handleChange} value={formData.direccionTestigo2} />
+            <p className="text-xs font-semibold uppercase text-slate-500 mt-2">Testigo 2</p>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <Field label="Nombres" name="nombresTestigo2" placeholder="Nombres" onChange={handleChange} value={formData.nombresTestigo2} />
+              <Field label="Apellidos" name="apellidosTestigo2" placeholder="Apellidos" onChange={handleChange} value={formData.apellidosTestigo2} />
+              <SelectField label="Tipo de Documento" name="tipoDocTestigo2" onChange={handleChange} value={formData.tipoDocTestigo2}>
+                <option value="CEDULA">CÉDULA</option>
+                <option value="PASAPORTE">PASAPORTE</option>
+              </SelectField>
+              <Field label="Documento" name="docidentidadTestigo2" placeholder="Cédula" onChange={handleChange} value={formData.docidentidadTestigo2} />
+              <Field label="Edad" name="edadTestigo2" placeholder="Edad" type="number" onChange={handleChange} value={formData.edadTestigo2} />
+              <Field label="Nacionalidad" name="nacionalidadTestigo2" placeholder="Nacionalidad" onChange={handleChange} value={formData.nacionalidadTestigo2} />
+              <Field label="Profesión" name="profesionTestigo2" placeholder="Profesión" onChange={handleChange} value={formData.profesionTestigo2} />
+              <Field label="Dirección" name="direccionTestigo2" placeholder="Dirección" onChange={handleChange} value={formData.direccionTestigo2} />
             </div>
 
-            <div className="pt-4 border-t mt-4">
-                <p className="text-xs text-center text-gray-500">Al procesar, certifica que los datos son verdaderos.</p>
+            <div className="pt-4 border-t border-slate-200 mt-4">
+               <p className="text-xs text-center text-slate-500">Al procesar, certifica que los datos son verdaderos.</p>
+            </div>
             </div>
           </div>
         )}
@@ -158,9 +261,9 @@ const RegisterUEHForm = ({ onSubmit, onCancel }) => {
           )}
 
           {step < 3 ? (
-             <Button type="button" onClick={nextStep} className="bg-blue-600">Siguiente</Button>
+             <Button type="button" onClick={nextStep} className="bg-indigo-600 hover:bg-indigo-700">Siguiente</Button>
           ) : (
-             <Button type="submit" disabled={loading} className="bg-green-600 w-full ml-auto">
+             <Button type="button" onClick={handleSubmit} disabled={loading} className="bg-emerald-600 hover:bg-emerald-700 w-full ml-auto">
                {loading ? 'Generando Acta...' : 'Generar Documento PDF'}
              </Button>
           )}
