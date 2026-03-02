@@ -145,6 +145,16 @@ export default function ChatPage() {
               data={msg.chartData?.distribucion_tramites || []}
               title="Distribución por Trámite"
             />
+            <StatsChart
+              type="bar"
+              data={msg.chartData?.actas_tendencia || []}
+              title="Tendencia de Actas (Últimos 7 días)"
+            />
+            <StatsChart
+              type="pie"
+              data={msg.chartData?.distribucion_actas || []}
+              title="Distribución de Actas por Tipo"
+            />
           </div>
         )}
       </div>

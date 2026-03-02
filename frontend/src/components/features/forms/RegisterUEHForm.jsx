@@ -1,23 +1,25 @@
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 
-const Field = ({ label, ...props }) => (
-  <label className="flex flex-col gap-1 text-sm text-slate-700">
-    <span className="font-medium text-slate-600">{label}</span>
+const Field = ({ label, required = true, ...props }) => (
+  <label className="flex flex-col gap-1 text-sm text-gray-300">
+    <span className="font-medium text-gray-400">{label}</span>
     <input
       {...props}
-      className="w-full bg-transparent border-0 border-b border-slate-300 px-0 py-2 text-slate-900 placeholder:text-slate-400 focus:border-indigo-600 focus:ring-0 outline-none"
+      required={required}
+      className="w-full bg-transparent border-0 border-b border-white/20 px-0 py-2 text-gray-100 placeholder:text-gray-500 focus:border-primary-500 focus:ring-0 outline-none"
     />
   </label>
 );
 
-const SelectField = ({ label, children, ...props }) => (
-  <label className="flex flex-col gap-1 text-sm text-slate-700">
-    <span className="font-medium text-slate-600">{label}</span>
+const SelectField = ({ label, children, required = true, ...props }) => (
+  <label className="flex flex-col gap-1 text-sm text-gray-300">
+    <span className="font-medium text-gray-400">{label}</span>
     <select
       {...props}
-      className="w-full bg-transparent border-0 border-b border-slate-300 px-0 py-2 text-slate-900 focus:border-indigo-600 focus:ring-0 outline-none"
+      required={required}
+      className="w-full bg-transparent border-0 border-b border-white/20 px-0 py-2 text-gray-100 focus:border-primary-500 focus:ring-0 outline-none"
     >
       {children}
     </select>
@@ -25,6 +27,7 @@ const SelectField = ({ label, children, ...props }) => (
 );
 
 const RegisterUEHForm = ({ onSubmit, onCancel }) => {
+  const formRef = useRef(null);
   const [step, setStep] = useState(1);
   const [formData, setFormData] = useState({
     tipoActa: '',
@@ -71,6 +74,12 @@ const RegisterUEHForm = ({ onSubmit, onCancel }) => {
 
   const handleSubmit = async () => {
     if (step !== 3) return;
+
+    if (formRef.current && !formRef.current.checkValidity()) {
+      formRef.current.reportValidity();
+      return;
+    }
+
     setLoading(true);
     try {
       const response = await fetch('http://localhost:8000/api/documents/generate-ueh', {
@@ -97,21 +106,22 @@ const RegisterUEHForm = ({ onSubmit, onCancel }) => {
 
   if (pdfUrl) {
     return (
-      <Card className="p-6 bg-green-50 border-green-200">
-        <h3 className="text-xl font-bold text-green-800 mb-4">¡Acta Generada!</h3>
+      <Card className="p-6 bg-dark-800/80 border border-emerald-500/30 rounded-2xl">
+        <h3 className="text-xl font-bold text-emerald-300 mb-4">¡Acta Generada!</h3>
         <a href={pdfUrl} download="acta_ueh.pdf">
-          <Button className="w-full bg-green-600 hover:bg-green-700">Descargar PDF</Button>
+          <Button className="w-full bg-emerald-600 hover:bg-emerald-700">Descargar PDF</Button>
         </a>
       </Card>
     );
   }
 
   return (
-    <Card className="p-5 md:p-6 w-full max-w-4xl mx-auto bg-white border border-slate-200 shadow-sm mt-4 text-slate-800 rounded-2xl">
-      <h3 className="text-xl font-semibold mb-5 text-slate-900 border-b border-slate-200 pb-3">
+    <Card className="p-5 md:p-6 w-full max-w-4xl mx-auto bg-dark-800/80 backdrop-blur-xl border border-white/10 shadow-xl mt-4 text-gray-100 rounded-2xl">
+      <h3 className="text-xl font-semibold mb-5 text-white border-b border-white/10 pb-3">
         Registro Civil - INSERCION DE ACTAS (Paso {step}/3)
       </h3>
       <form
+        ref={formRef}
         onKeyDown={(e) => {
           if (e.key === 'Enter') {
             e.preventDefault();
@@ -123,8 +133,8 @@ const RegisterUEHForm = ({ onSubmit, onCancel }) => {
         {/* PASO 1: UNIDO DE HECHO */}
         {step === 1 && (
           <div className="space-y-5 animation-fade-in">
-            <div className="rounded-xl border border-slate-200 p-4">
-              <h4 className="font-semibold text-slate-800 mb-3">Tipo de Acta</h4>
+            <div className="rounded-xl border border-white/10 bg-dark-900/40 p-4">
+              <h4 className="font-semibold text-gray-100 mb-3">Tipo de Acta</h4>
               <SelectField
                 label="Trámite"
               name="tipoActa"
@@ -142,8 +152,8 @@ const RegisterUEHForm = ({ onSubmit, onCancel }) => {
               </SelectField>
             </div>
 
-            <div className="rounded-xl border border-slate-200 p-4">
-              <h4 className="font-semibold text-slate-800 mb-3">Ubicación del Acta</h4>
+            <div className="rounded-xl border border-white/10 bg-dark-900/40 p-4">
+              <h4 className="font-semibold text-gray-100 mb-3">Ubicación del Acta</h4>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <Field label="Estado" name="nombrestado" placeholder="Ej: Táchira" required onChange={handleChange} value={formData.nombrestado} />
                 <Field label="Municipio" name="nombremunicipio" placeholder="Ej: San Cristóbal" required onChange={handleChange} value={formData.nombremunicipio} />
@@ -151,8 +161,8 @@ const RegisterUEHForm = ({ onSubmit, onCancel }) => {
               </div>
             </div>
 
-            <div className="rounded-xl border border-slate-200 p-4">
-              <h4 className="font-semibold text-slate-800 mb-3">Datos del Primer Declarante</h4>
+            <div className="rounded-xl border border-white/10 bg-dark-900/40 p-4">
+              <h4 className="font-semibold text-gray-100 mb-3">Datos del Primer Declarante</h4>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <Field label="Primer Nombre" name="nombre1Unido" placeholder="Nombres" required onChange={handleChange} value={formData.nombre1Unido} />
                 <Field label="Segundo Nombre" name="nombre2Unido" placeholder="Segundo nombre" onChange={handleChange} value={formData.nombre2Unido} />
@@ -182,8 +192,8 @@ const RegisterUEHForm = ({ onSubmit, onCancel }) => {
         {/* PASO 2: UNIDA DE HECHO */}
         {step === 2 && (
           <div className="space-y-5 animation-fade-in">
-            <div className="rounded-xl border border-slate-200 p-4">
-              <h4 className="font-semibold text-slate-800 mb-3">Datos del Segundo Declarante</h4>
+            <div className="rounded-xl border border-white/10 bg-dark-900/40 p-4">
+              <h4 className="font-semibold text-gray-100 mb-3">Datos del Segundo Declarante</h4>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <Field label="Primer Nombre" name="nombre1Unida" placeholder="Nombres" required onChange={handleChange} value={formData.nombre1Unida} />
                 <Field label="Segundo Nombre" name="nombre2Unida" placeholder="Segundo nombre" onChange={handleChange} value={formData.nombre2Unida} />
@@ -213,10 +223,10 @@ const RegisterUEHForm = ({ onSubmit, onCancel }) => {
         {/* PASO 3: TESTIGOS Y FINALIZAR */}
         {step === 3 && (
            <div className="space-y-5 animation-fade-in">
-            <div className="rounded-xl border border-slate-200 p-4">
-            <h4 className="font-semibold text-slate-800 mb-3">Datos de Testigos</h4>
+            <div className="rounded-xl border border-white/10 bg-dark-900/40 p-4">
+            <h4 className="font-semibold text-gray-100 mb-3">Datos de Testigos</h4>
             
-            <p className="text-xs font-semibold uppercase text-slate-500">Testigo 1</p>
+            <p className="text-xs font-semibold uppercase text-gray-400">Testigo 1</p>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <Field label="Nombres" name="nombresTestigo1" placeholder="Nombres" onChange={handleChange} value={formData.nombresTestigo1} />
               <Field label="Apellidos" name="apellidosTestigo1" placeholder="Apellidos" onChange={handleChange} value={formData.apellidosTestigo1} />
@@ -231,7 +241,7 @@ const RegisterUEHForm = ({ onSubmit, onCancel }) => {
               <Field label="Dirección" name="direccionTestigo1" placeholder="Dirección" onChange={handleChange} value={formData.direccionTestigo1} />
             </div>
 
-            <p className="text-xs font-semibold uppercase text-slate-500 mt-2">Testigo 2</p>
+            <p className="text-xs font-semibold uppercase text-gray-400 mt-2">Testigo 2</p>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <Field label="Nombres" name="nombresTestigo2" placeholder="Nombres" onChange={handleChange} value={formData.nombresTestigo2} />
               <Field label="Apellidos" name="apellidosTestigo2" placeholder="Apellidos" onChange={handleChange} value={formData.apellidosTestigo2} />
@@ -246,8 +256,8 @@ const RegisterUEHForm = ({ onSubmit, onCancel }) => {
               <Field label="Dirección" name="direccionTestigo2" placeholder="Dirección" onChange={handleChange} value={formData.direccionTestigo2} />
             </div>
 
-            <div className="pt-4 border-t border-slate-200 mt-4">
-               <p className="text-xs text-center text-slate-500">Al procesar, certifica que los datos son verdaderos.</p>
+            <div className="pt-4 border-t border-white/10 mt-4">
+              <p className="text-xs text-center text-gray-400">Al procesar, certifica que los datos son verdaderos.</p>
             </div>
             </div>
           </div>

@@ -98,7 +98,23 @@ export default function DashboardPage() {
       )}
 
       {stats && !isLoadingStats && (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 animate-in fade-in duration-500">
+        <div className="space-y-4 animate-in fade-in duration-500">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+            <div className="bg-dark-800/50 border border-white/5 rounded-xl p-4">
+              <p className="text-xs text-gray-400 uppercase">Citas Hoy</p>
+              <p className="text-2xl font-bold text-white">{stats?.overview?.citas_hoy ?? 0}</p>
+            </div>
+            <div className="bg-dark-800/50 border border-white/5 rounded-xl p-4">
+              <p className="text-xs text-gray-400 uppercase">Total Citas</p>
+              <p className="text-2xl font-bold text-white">{stats?.overview?.total_citas ?? 0}</p>
+            </div>
+            <div className="bg-dark-800/50 border border-white/5 rounded-xl p-4">
+              <p className="text-xs text-gray-400 uppercase">Total Actas</p>
+              <p className="text-2xl font-bold text-white">{stats?.overview?.total_actas ?? 0}</p>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <StatsChart 
             type="line" 
             data={stats.citas_tendencia} 
@@ -109,6 +125,20 @@ export default function DashboardPage() {
             data={stats.distribucion_tramites} 
             title="Distribución por Trámite" 
           />
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <StatsChart 
+              type="bar" 
+              data={stats.actas_tendencia || []} 
+              title="Tendencia de Actas (Últimos 7 días)" 
+            />
+            <StatsChart 
+              type="pie" 
+              data={stats.distribucion_actas || []} 
+              title="Distribución de Actas por Tipo" 
+            />
+          </div>
         </div>
       )}
 
