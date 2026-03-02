@@ -3,8 +3,9 @@ from fastapi.responses import Response
 from app.services.pdf_service import PDFService
 from pydantic import BaseModel
 from app.models.civil_registry import Registrador, Acta, Unido, Testigo
+from app.models.acta import ActaUEH
 from app.core.database import SessionLocal, engine, Base
-from sqlalchemy import Column, Integer, String, DateTime, JSON
+from sqlalchemy import Column, Integer, String, DateTime, JSON, text, inspect
 from datetime import datetime
 import json
 
@@ -20,6 +21,12 @@ class SolicitudWeb(Base):
 # Crear todas las tablas (incluyendo las nuevas de civil_registry)
 Base.metadata.create_all(bind=engine)
 
+try:
+    with engine.begin() as conn:
+        conn.execute(text("ALTER TABLE actas ADD COLUMN IF NOT EXISTS tipo_acta VARCHAR"))
+except Exception as schema_err:
+    print(f"Aviso de esquema (tipo_acta): {schema_err}")
+
 router = APIRouter()
 pdf_service = PDFService()
 
@@ -28,12 +35,12 @@ class CertificateData(BaseModel):
     nombrestado: str = "Táchira"
     nombremunicipio: str = "San Cristóbal"
     nombreparroquia: str = "La Concordia"
-    charnacta: str = "WEB-000"
-    folio: str = "001"
+    charnacta: str = ""
+    folio: str = ""
     dia1: str = str(datetime.now().day)
     mes1: str = str(datetime.now().month)
     ano1: str = str(datetime.now().year)
-    tipoActa: str = "ACTA DE UNIÓN ESTABLE DE HECHO"
+    tipoActa: str = ""
 
     # A. Registrador
     nombre1r: str = "Registrador"
@@ -56,18 +63,19 @@ class CertificateData(BaseModel):
     fechaNacUnido: str = ""
     edadUnido: str = ""
     numDocumentoUnido: str
-    tipoDocUnido: str = "V"
-    etiquetaPais: str = "País"
-    paisNacUnido: str = "Venezuela"
-    etiquetaEstado: str = "Estado"
+    tipoDocUnido: str = ""
+    etiquetaPais: str = ""
+    paisNacUnido: str = ""
+    etiquetaEstado: str = ""
     estadoNacUnido: str = ""
-    etiquetaMunicipio: str = "Mcpio"
+    etiquetaMunicipio: str = ""
     municipioNacUnido: str = ""
-    etiquetaParroquia: str = "Parr"
+    etiquetaParroquia: str = ""
     parroquiaNacUnido: str = ""
-    nacionalidadUnido: str = "Venezolano"
-    edoCivilUnido: str = "Soltero"
-    profesionUnido: str = "Obrero"
+    nacionalidadUnido: str = ""
+    esExtranjeroUnido: str = ""
+    edoCivilUnido: str = ""
+    profesionUnido: str = ""
     direccionUnido: str = ""
 
     # C. Unida
@@ -78,18 +86,19 @@ class CertificateData(BaseModel):
     fechaNacUnida: str = ""
     edadUnida: str = ""
     numDocumentoUnida: str
-    tipoDocUnida: str = "V"
-    etiquetaPais1: str = "País"
-    paisNacUnida: str = "Venezuela"
-    etiquetaEstado1: str = "Estado"
+    tipoDocUnida: str = ""
+    etiquetaPais1: str = ""
+    paisNacUnida: str = ""
+    etiquetaEstado1: str = ""
     estadoNacUnida: str = ""
-    etiquetaMunicipio1: str = "Mcpio"
+    etiquetaMunicipio1: str = ""
     municipioNacUnida: str = ""
-    etiquetaParroquia1: str = "Parr"
+    etiquetaParroquia1: str = ""
     parroquiaNacUnida: str = ""
-    nacionalidadUnida: str = "Venezolana"
-    edoCivilUnida: str = "Soltera"
-    profesionUnida: str = "Obrera"
+    nacionalidadUnida: str = ""
+    esExtranjeroUnida: str = ""
+    edoCivilUnida: str = ""
+    profesionUnida: str = ""
     direccionUnida: str = ""
 
     # D. Manifestación y Hijos
@@ -97,28 +106,34 @@ class CertificateData(BaseModel):
     tablaHijos: str = "" # HTML string o texto
 
     # F. Testigos
-    nombresTestigo1: str = "Testigo1"
-    apellidosTestigo1: str = "Apellido1"
-    tipoDocTestigo1: str = "V"
-    docidentidadTestigo1: str = "000"
-    edadTestigo1: str = "30"
-    profesionTestigo1: str = "Testigo"
-    nacionalidadTestigo1: str = "Venezolano"
+    nombresTestigo1: str = ""
+    apellidosTestigo1: str = ""
+    tipoDocTestigo1: str = ""
+    docidentidadTestigo1: str = ""
+    edadTestigo1: str = ""
+    profesionTestigo1: str = ""
+    nacionalidadTestigo1: str = ""
     direccionTestigo1: str = ""
 
-    nombresTestigo2: str = "Testigo2"
-    apellidosTestigo2: str = "Apellido2"
-    tipoDocTestigo2: str = "V"
-    docidentidadTestigo2: str = "000"
-    edadTestigo2: str = "30"
-    profesionTestigo2: str = "Testigo"
-    nacionalidadTestigo2: str = "Venezolano"
+    nombresTestigo2: str = ""
+    apellidosTestigo2: str = ""
+    tipoDocTestigo2: str = ""
+    docidentidadTestigo2: str = ""
+    edadTestigo2: str = ""
+    profesionTestigo2: str = ""
+    nacionalidadTestigo2: str = ""
     direccionTestigo2: str = ""
 
 @router.post("/generate-ueh")
 async def generate_ueh_pdf(data: CertificateData):
     db = SessionLocal()
     try:
+        # Asegurar compatibilidad de esquema en tiempo de ejecución
+        columns = [col["name"] for col in inspect(db.bind).get_columns("actas")]
+        if "tipo_acta" not in columns:
+            db.execute(text("ALTER TABLE actas ADD COLUMN tipo_acta VARCHAR"))
+            db.commit()
+
         # --- Lógica Relacional ---
         
         # 1. Buscar o Crear Registrador
@@ -141,11 +156,36 @@ async def generate_ueh_pdf(data: CertificateData):
             db.commit()
             db.refresh(registrador)
 
-        # 2. Crear Acta (Inicial)
-        data.charnacta = f"WEB-{datetime.now().strftime('%M%S')}" # Temporal
+        # 2. Calcular secuencia de número de acta (1..256) y folio incremental
+        last_numeric_acta = None
+        recent_actas = db.query(Acta).order_by(Acta.id.desc()).limit(1000).all()
+        for row in recent_actas:
+            numero_val = (row.numero_acta or "").strip()
+            folio_val = (row.folio or "").strip()
+            if numero_val.isdigit() and folio_val.isdigit():
+                last_numeric_acta = row
+                break
+
+        if last_numeric_acta:
+            current_numero = int(last_numeric_acta.numero_acta)
+            current_folio = int(last_numeric_acta.folio)
+        else:
+            current_numero = 0
+            current_folio = int((data.folio or "1").strip()) if str(data.folio or "1").strip().isdigit() else 1
+
+        if current_numero >= 256:
+            next_numero = 1
+            next_folio = current_folio + 1
+        else:
+            next_numero = current_numero + 1
+            next_folio = current_folio
+
+        data.charnacta = str(next_numero)
+        data.folio = str(next_folio)
         
         nueva_acta = Acta(
-            numero_acta=data.charnacta, 
+            numero_acta=data.charnacta,
+            tipo_acta=(data.tipoActa or "UNION ESTABLE").upper(),
             folio=data.folio,
             fecha_acta=datetime(year=int(data.ano1), month=int(data.mes1), day=int(data.dia1)),
             fecha_manifestacion=data.fechaManis,
@@ -159,6 +199,11 @@ async def generate_ueh_pdf(data: CertificateData):
         db.refresh(nueva_acta)
         
         # 3. Datos de los Unidos
+        tipo_doc_unido = "P" if (data.tipoDocUnido or "").upper().startswith("P") else "V"
+        tipo_doc_unida = "P" if (data.tipoDocUnida or "").upper().startswith("P") else "V"
+        tipo_doc_testigo_1 = "P" if (data.tipoDocTestigo1 or "").upper().startswith("P") else "V"
+        tipo_doc_testigo_2 = "P" if (data.tipoDocTestigo2 or "").upper().startswith("P") else "V"
+
         # Unida/o 1
         unido1 = Unido(
             acta_id=nueva_acta.id,
@@ -168,7 +213,7 @@ async def generate_ueh_pdf(data: CertificateData):
             apellido1=data.apellido1Unido,
             apellido2=data.apellido2Unido,
             cedula=data.numDocumentoUnido,
-            tipo_documento=data.tipoDocUnido,
+            tipo_documento=tipo_doc_unido,
             fecha_nacimiento=data.fechaNacUnido,
             edad=data.edadUnido,
             nacionalidad=data.nacionalidadUnido,
@@ -189,7 +234,7 @@ async def generate_ueh_pdf(data: CertificateData):
             apellido1=data.apellido1Unida,
             apellido2=data.apellido2Unida,
             cedula=data.numDocumentoUnida,
-            tipo_documento=data.tipoDocUnida,
+            tipo_documento=tipo_doc_unida,
             fecha_nacimiento=data.fechaNacUnida,
             edad=data.edadUnida,
             nacionalidad=data.nacionalidadUnida,
@@ -211,7 +256,7 @@ async def generate_ueh_pdf(data: CertificateData):
             nombres=data.nombresTestigo1,
             apellidos=data.apellidosTestigo1,
             cedula=data.docidentidadTestigo1,
-            tipo_documento=data.tipoDocTestigo1,
+            tipo_documento=tipo_doc_testigo_1,
             edad=data.edadTestigo1,
             nacionalidad=data.nacionalidadTestigo1,
             profesion=data.profesionTestigo1,
@@ -224,7 +269,7 @@ async def generate_ueh_pdf(data: CertificateData):
             nombres=data.nombresTestigo2,
             apellidos=data.apellidosTestigo2,
             cedula=data.docidentidadTestigo2,
-            tipo_documento=data.tipoDocTestigo2,
+            tipo_documento=tipo_doc_testigo_2,
             edad=data.edadTestigo2,
             nacionalidad=data.nacionalidadTestigo2,
             profesion=data.profesionTestigo2,
@@ -235,14 +280,48 @@ async def generate_ueh_pdf(data: CertificateData):
         db.add(testigo2)
         db.commit()
         
-        # 5. Actualizar Numero de Acta Final
-        real_nacta = f"WEB-{nueva_acta.id}-{datetime.now().year}"
-        nueva_acta.numero_acta = real_nacta
-        db.add(nueva_acta)
+        # 5. Insertar registro genérico en actaueh
+        audit_payload = {
+            "tipoActa": data.tipoActa,
+            "acta_id": nueva_acta.id,
+            "numero_acta": data.charnacta,
+            "folio": data.folio,
+            "ubicacion": {
+                "estado": data.nombrestado,
+                "municipio": data.nombremunicipio,
+                "parroquia": data.nombreparroquia,
+            },
+            "declarante_1": {
+                "nombre": f"{data.nombre1Unido} {data.apellido1Unido}".strip(),
+                "documento": data.numDocumentoUnido,
+                "es_extranjero": data.esExtranjeroUnido,
+                "nacionalidad": data.nacionalidadUnido,
+            },
+            "declarante_2": {
+                "nombre": f"{data.nombre1Unida} {data.apellido1Unida}".strip(),
+                "documento": data.numDocumentoUnida,
+                "es_extranjero": data.esExtranjeroUnida,
+                "nacionalidad": data.nacionalidadUnida,
+            },
+        }
+
+        acta_multi = ActaUEH(
+            nacta=int(data.charnacta),
+            tomo=int(data.folio) if str(data.folio).isdigit() else None,
+            ano=datetime.now().year,
+            fechaacta=datetime.now(),
+            tipoacta=(data.tipoActa or "UNION ESTABLE").upper(),
+            solicitante_json=json.dumps(audit_payload, ensure_ascii=False)
+        )
+        db.add(acta_multi)
         db.commit()
         
         # Actualizamos objeto data para el PDF
-        data.charnacta = real_nacta
+        data.tipoActa = (data.tipoActa or "UNION ESTABLE").upper()
+        data.tipoDocUnido = tipo_doc_unido
+        data.tipoDocUnida = tipo_doc_unida
+        data.tipoDocTestigo1 = tipo_doc_testigo_1
+        data.tipoDocTestigo2 = tipo_doc_testigo_2
 
         # 6. Generar PDF
         pdf_bytes = pdf_service.generate_from_template(data.dict())
@@ -257,3 +336,7 @@ async def generate_ueh_pdf(data: CertificateData):
         raise HTTPException(status_code=500, detail=str(e))
     finally:
         db.close()
+
+@router.post("/generate-acta")
+async def generate_generic_acta_pdf(data: CertificateData):
+    return await generate_ueh_pdf(data)
