@@ -6,6 +6,8 @@ import { getFormById } from '@/components/features/forms/registry';
 import { useLocation } from 'react-router-dom';
 import api from '@/lib/api';
 import { StatsChart } from '@/components/features/stats/StatsChart';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 
 export default function ChatPage() {
   const location = useLocation();
@@ -118,10 +120,17 @@ export default function ChatPage() {
 
   const renderMessageContent = (msg) => {
     const FormComponent = msg.formId ? getFormById(msg.formId) : null;
+    const isBot = msg.role === 'bot';
 
     return (
       <div className="flex flex-col gap-2">
-        <p className="text-sm md:text-base leading-relaxed whitespace-pre-wrap">{msg.text}</p>
+        {isBot ? (
+          <div className="prose prose-invert max-w-none prose-p:my-1 prose-headings:my-2 prose-li:my-0.5 prose-ul:my-2 prose-ol:my-2 prose-strong:text-white prose-code:text-primary-300">
+            <ReactMarkdown remarkPlugins={[remarkGfm]}>{msg.text || ''}</ReactMarkdown>
+          </div>
+        ) : (
+          <p className="text-sm md:text-base leading-relaxed whitespace-pre-wrap">{msg.text}</p>
+        )}
         
         {FormComponent && (
           <div className="mt-4 p-2 bg-white rounded-lg text-gray-900 border border-gray-200 shadow-sm animate-in fade-in slide-in-from-bottom-4">
