@@ -1,11 +1,33 @@
-import React from 'react';
-import { Send, GraduationCap, Calendar, UserPlus, Search, MessageCircle, FileText, Download } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Send, GraduationCap, Calendar, UserPlus, Search, MessageCircle, FileText, BarChart2 } from 'lucide-react';
 import { ActionCard } from '@/features/dashboard/components/ActionCard';
 import { Input } from '@/components/ui/Input';
 import { useNavigate } from 'react-router-dom';
+import { StatsChart } from '@/components/features/stats/StatsChart';
+import api from '@/lib/api';
 
 export default function DashboardPage() {
   const navigate = useNavigate();
+  const [stats, setStats] = useState(null);
+  const [isLoadingStats, setIsLoadingStats] = useState(true);
+  const [statsError, setStatsError] = useState('');
+
+  useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        setIsLoadingStats(true);
+        setStatsError('');
+        const response = await api.get('/stats/summary');
+        setStats(response.data);
+      } catch (err) {
+        console.error('Error fetching stats:', err);
+        setStatsError('No se pudieron cargar las estadísticas en este momento.');
+      } finally {
+        setIsLoadingStats(false);
+      }
+    };
+    fetchStats();
+  }, []);
 
   const handleAction = (prompt) => {
     // Navegamos al chat pasando el prompt inicial como estado
@@ -52,28 +74,55 @@ export default function DashboardPage() {
   ];
 
   return (
-    <div className="flex flex-col h-full max-w-5xl mx-auto px-3 md:px-4 lg:p-8">
-      {/* Header Section - Flex None to stay fixed */}
-      <div className="flex-none mb-2 md:mb-12 mt-2 md:mt-4 text-center space-y-1 md:space-y-3">
+    <div className="h-full overflow-y-auto no-scrollbar">
+      <div className="max-w-5xl mx-auto px-3 md:px-4 lg:px-8 py-3 md:py-6 space-y-6 md:space-y-8">
+      {/* Header Section */}
+      <div className="text-center space-y-1 md:space-y-3">
         <h1 className="text-3xl md:text-5xl font-bold text-white tracking-tight leading-tight">
           Asistente Virtual <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary-500 to-accent-blue">Bot CNE</span>
         </h1>
         <p className="text-sm md:text-xl text-gray-400 font-light max-w-md mx-auto">Gestione sus trámites del Registro Civil de forma rápida y sencilla con IA.</p>
       </div>
 
-      {/* Grid Section - Flex 1 + Overflow Auto handles the scroll */}
-      <div className="flex-1 min-h-0 overflow-y-auto no-scrollbar">
-          <div className="grid grid-cols-2 lg:grid-cols-3 gap-2 md:gap-6 pb-2 md:pb-4">
-            {actions.map((action, idx) => (
-                <div key={idx} onClick={action.onClick} className="cursor-pointer">
-                  <ActionCard {...action} progress={null} />
-                </div>
-            ))}
-          </div>
+      {/* Stats Section - New */}
+      {isLoadingStats && (
+        <div className="p-4 rounded-2xl bg-dark-800/50 border border-white/5 text-gray-300">
+          Cargando gráficos...
+        </div>
+      )}
+
+      {statsError && !isLoadingStats && (
+        <div className="p-4 rounded-2xl bg-dark-800/50 border border-white/5 text-red-300">
+          {statsError}
+        </div>
+      )}
+
+      {stats && !isLoadingStats && (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 animate-in fade-in duration-500">
+          <StatsChart 
+            type="line" 
+            data={stats.citas_tendencia} 
+            title="Tendencia de Citas (Últimos 7 días)" 
+          />
+          <StatsChart 
+            type="pie" 
+            data={stats.distribucion_tramites} 
+            title="Distribución por Trámite" 
+          />
+        </div>
+      )}
+
+      {/* Grid Section */}
+      <div className="grid grid-cols-2 lg:grid-cols-3 gap-2 md:gap-6">
+        {actions.map((action, idx) => (
+            <div key={idx} onClick={action.onClick} className="cursor-pointer">
+              <ActionCard {...action} progress={null} />
+            </div>
+        ))}
       </div>
 
-      {/* Footer Prompt Input - Flex None to stay at bottom */}
-      <div className="flex-none mt-1 mb-2 md:mt-4 md:mb-6">
+      {/* Footer Prompt Input */}
+      <div className="pt-1 pb-2 md:pt-2 md:pb-6">
         <form 
           onSubmit={(e) => {
             e.preventDefault();
@@ -91,6 +140,7 @@ export default function DashboardPage() {
                 <Send className="w-5 h-5 md:w-6 md:h-6" />
             </button>
         </form>
+      </div>
       </div>
     </div>
   );
