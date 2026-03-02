@@ -28,6 +28,7 @@ class Acta(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     numero_acta = Column(String, index=True)
+    tipo_acta = Column(String, nullable=True)
     folio = Column(String)
     fecha_acta = Column(DateTime, default=datetime.now)
     fecha_manifestacion = Column(String)
