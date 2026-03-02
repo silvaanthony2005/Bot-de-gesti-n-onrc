@@ -48,7 +48,22 @@ export default function ChatPage() {
       const data = await chatService.sendMessage(text);
       const responseText = data?.response || '';
       const chartIntent = /(grafico|gráfico|estadistica|estadística|tendencia|distribucion|distribución|panel|dashboard)/i.test(text);
+      const analysisIntent = /(analisis|análisis|reporte|resumen|filtr|compar|insight|indicador|metric)/i.test(text);
       const appointmentIntent = /(agendar|agenda|cita|reservar|reserva|turno)/i.test(text);
+
+      const parseDays = () => {
+        if (/(hoy)/i.test(text)) return 1;
+        if (/(semana|semanal|7 dias|7 días)/i.test(text)) return 7;
+        if (/(mes|mensual|30 dias|30 días)/i.test(text)) return 30;
+        if (/(trimestre|90 dias|90 días)/i.test(text)) return 90;
+        return 30;
+      };
+
+      const parseTipoTramite = () => {
+        const upper = text.toUpperCase();
+        const options = ['UNION ESTABLE', 'DEFUNCION', 'NACIONALIDAD', 'NACIMIENTO', 'CAPACIDAD', 'MATRIMONIO', 'UEH'];
+        return options.find((opt) => upper.includes(opt)) || null;
+      };
       
       const formMatch = responseText.match(/\[FORMULARIO:\s*(\w+)\]/);
       const actionMatch =
@@ -88,6 +103,39 @@ export default function ChatPage() {
             chartData: charts
           }]);
           return;
+        }
+      }
+
+      if (analysisIntent && !formId) {
+        try {
+          const params = {
+            days: parseDays(),
+            tipo_tramite: parseTipoTramite() || undefined,
+            tipo_acta: parseTipoTramite() || undefined,
+          };
+          const insightsResponse = await api.get('/stats/insights', { params });
+          const insights = insightsResponse.data;
+
+          let insightsText = "\n\n### Resumen analítico filtrado\n";
+          insightsText += insights?.summary_markdown || '- No hay datos para el filtro seleccionado.';
+
+          if (insights?.top_tramites?.length) {
+            insightsText += "\n\n### Top trámites\n";
+            insights.top_tramites.forEach((item) => {
+              insightsText += `- **${item.name}**: ${item.value}\n`;
+            });
+          }
+
+          if (insights?.top_actas?.length) {
+            insightsText += "\n### Top actas\n";
+            insights.top_actas.forEach((item) => {
+              insightsText += `- **${item.name}**: ${item.value}\n`;
+            });
+          }
+
+          cleanText = `${cleanText}${insightsText}`.trim();
+        } catch (insightsError) {
+          console.error('No se pudieron cargar insights:', insightsError);
         }
       }
 

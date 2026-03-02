@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Send, GraduationCap, Calendar, UserPlus, Search, MessageCircle, FileText, BarChart2 } from 'lucide-react';
+import { Send, GraduationCap, Calendar, UserPlus, Search, FileText, BarChart2 } from 'lucide-react';
 import { ActionCard } from '@/features/dashboard/components/ActionCard';
 import { Input } from '@/components/ui/Input';
 import { useNavigate } from 'react-router-dom';
@@ -54,10 +54,10 @@ export default function DashboardPage() {
       onClick: () => handleAction("Necesito buscar un acta en el sistema")
     },
     { 
-      title: "Chat General", 
-      icon: MessageCircle, 
+      title: "Análisis", 
+      icon: BarChart2, 
       color: "indigo", 
-      onClick: () => navigate('/chat')
+      onClick: () => handleAction("Dame un análisis de los últimos 30 días con insights clave de citas y actas")
     },
     { 
       title: "Información Trámites", 
@@ -125,19 +125,6 @@ export default function DashboardPage() {
             data={stats.distribucion_tramites} 
             title="Distribución por Trámite" 
           />
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <StatsChart 
-              type="bar" 
-              data={stats.actas_tendencia || []} 
-              title="Tendencia de Actas (Últimos 7 días)" 
-            />
-            <StatsChart 
-              type="pie" 
-              data={stats.distribucion_actas || []} 
-              title="Distribución de Actas por Tipo" 
-            />
           </div>
         </div>
       )}
