@@ -8,7 +8,7 @@ export default function AppointmentForm({ onSubmit, onCancel }) {
     email: '',
     fecha: '',
     hora: '',
-    tipo_tramite: 'UEH'
+    tipo_tramite: ''
   });
   
   const [status, setStatus] = useState('idle'); // idle, loading, success, error
@@ -29,7 +29,7 @@ export default function AppointmentForm({ onSubmit, onCancel }) {
       
       setStatus('success');
       setTimeout(() => {
-        onSubmit(`✅ Cita confirmada con éxito para el ${formData.fecha} a las ${formData.hora}. Se ha enviado un correo a ${formData.email}.`);
+        onSubmit(`✅ Cita confirmada con éxito para el ${formData.fecha} a las ${formData.hora} (${formData.tipo_tramite}). Se ha enviado un correo a ${formData.email}.`);
       }, 1500);
 
     } catch (err) {
@@ -93,6 +93,26 @@ export default function AppointmentForm({ onSubmit, onCancel }) {
               onChange={handleChange}
             />
           </div>
+        </div>
+
+        {/* Tipo de Trámite */}
+        <div>
+          <label className="block text-xs font-semibold text-gray-500 uppercase mb-1">Tipo de Trámite</label>
+          <select
+            required
+            name="tipo_tramite"
+            className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary-500 outline-none text-gray-800 bg-gray-50"
+            value={formData.tipo_tramite}
+            onChange={handleChange}
+          >
+            <option value="">Seleccionar trámite</option>
+            <option value="UNION ESTABLE">UNION ESTABLE</option>
+            <option value="DEFUNCION">DEFUNCION</option>
+            <option value="NACIONALIDAD">NACIONALIDAD</option>
+            <option value="NACIMIENTO">NACIMIENTO</option>
+            <option value="CAPACIDAD">CAPACIDAD</option>
+            <option value="MATRIMONIO">MATRIMONIO</option>
+          </select>
         </div>
 
         <div className="grid grid-cols-2 gap-4">
