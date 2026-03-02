@@ -4,6 +4,8 @@ import { Input } from '@/components/ui/Input';
 import { chatService } from '@/services/chatService';
 import { getFormById } from '@/components/features/forms/registry';
 import { useLocation } from 'react-router-dom';
+import api from '@/lib/api';
+import { StatsChart } from '@/components/features/stats/StatsChart';
 
 export default function ChatPage() {
   const location = useLocation();
@@ -42,14 +44,49 @@ export default function ChatPage() {
 
     try {
       const data = await chatService.sendMessage(text);
+      const responseText = data?.response || '';
+      const chartIntent = /(grafico|gráfico|estadistica|estadística|tendencia|distribucion|distribución|panel|dashboard)/i.test(text);
+      const appointmentIntent = /(agendar|agenda|cita|reservar|reserva|turno)/i.test(text);
       
-      const formMatch = data.response.match(/\[FORMULARIO:\s*(\w+)\]/);
+      const formMatch = responseText.match(/\[FORMULARIO:\s*(\w+)\]/);
+      const actionMatch =
+        responseText.match(/\[VER_GRAFICOS\]/i) ||
+        responseText.match(/__VER_GRAFICOS__/i) ||
+        responseText.match(/\[ACCION:\s*(\w+)\]/i);
       let formId = null;
-      let cleanText = data.response;
+      let cleanText = responseText;
 
       if (formMatch) {
         formId = formMatch[1];
         cleanText = data.response.replace(formMatch[0], '').trim();
+      }
+
+      if (!formId && appointmentIntent) {
+        formId = 'AGENDAR_CITA';
+      }
+
+      if (actionMatch || chartIntent) {
+        const action = actionMatch[1]?.toUpperCase() || 'VER_GRAFICOS';
+        if (actionMatch) {
+          cleanText = cleanText.replace(actionMatch[0], '').trim();
+        }
+        if (action === 'VER_GRAFICOS') {
+          let charts = null;
+          try {
+            const statsResponse = await api.get('/stats/summary');
+            charts = statsResponse.data;
+          } catch (statsError) {
+            console.error('No se pudieron cargar los gráficos:', statsError);
+          }
+
+          setMessages(prev => [...prev, {
+            id: Date.now() + 1,
+            role: 'bot',
+            text: cleanText || 'Aquí tienes el análisis visual solicitado:',
+            chartData: charts
+          }]);
+          return;
+        }
       }
 
       setMessages(prev => [...prev, { 
@@ -93,6 +130,21 @@ export default function ChatPage() {
              }} onCancel={() => {
                 setMessages(prev => [...prev, { id: Date.now(), role: 'user', text: "Cancelé el formulario." }]);
              }} />
+          </div>
+        )}
+
+        {msg.chartData && (
+          <div className="mt-4 grid grid-cols-1 gap-4">
+            <StatsChart
+              type="line"
+              data={msg.chartData?.citas_tendencia || []}
+              title="Tendencia de Citas (Últimos 7 días)"
+            />
+            <StatsChart
+              type="pie"
+              data={msg.chartData?.distribucion_tramites || []}
+              title="Distribución por Trámite"
+            />
           </div>
         )}
       </div>
