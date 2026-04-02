@@ -5,4 +5,4 @@ __pycache__/
 lib/
 
 # archivos de node.js
-node_modules/
+node_modules/backend/service_account.json
