@@ -13,6 +13,13 @@ SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 Base = declarative_base()
 
+
+def init_db():
+    # Solo creamos la tabla de usuarios para habilitar autenticación sin afectar otras tablas.
+    from app.models.user import User
+
+    User.__table__.create(bind=engine, checkfirst=True)
+
 def get_db():
     db = SessionLocal()
     try:

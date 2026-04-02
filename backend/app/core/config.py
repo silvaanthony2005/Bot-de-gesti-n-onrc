@@ -20,6 +20,11 @@ class Settings(BaseSettings):
     # Database Configuration
     DATABASE_URL: str | None = None
 
+    # Auth Configuration
+    SECRET_KEY: str = "change-this-secret-in-env"
+    JWT_ALGORITHM: str = "HS256"
+    ACCESS_TOKEN_EXPIRE_MINUTES: int = 60
+
     # CORS Configuration
     BACKEND_CORS_ORIGINS: list[str] = ["http://localhost:5173", "http://localhost:3000"]
 

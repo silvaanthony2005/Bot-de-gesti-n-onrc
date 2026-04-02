@@ -1,6 +1,8 @@
-from fastapi import FastAPI
+from fastapi import Depends, FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from app.core.auth import get_current_user
 from app.core.config import get_settings
+from app.core.database import init_db
 from app.controllers import chat_controller
 
 settings = get_settings()
@@ -21,11 +23,37 @@ app.add_middleware(
 )
 
 # Incluir Routers
-from app.routers import documents, appointments, stats
-app.include_router(chat_controller.router, prefix="/api", tags=["Chat"])
-app.include_router(documents.router, prefix="/api/documents", tags=["Documents"])
-app.include_router(appointments.router, prefix="/api/appointments", tags=["Citas"])
-app.include_router(stats.router, prefix="/api/stats", tags=["Estadísticas"])
+from app.routers import auth, documents, appointments, stats
+app.include_router(auth.router, prefix="/api/auth", tags=["Auth"])
+app.include_router(
+    documents.router,
+    prefix="/api/documents",
+    tags=["Documents"],
+    dependencies=[Depends(get_current_user)],
+)
+app.include_router(
+    appointments.router,
+    prefix="/api/appointments",
+    tags=["Citas"],
+    dependencies=[Depends(get_current_user)],
+)
+app.include_router(
+    stats.router,
+    prefix="/api/stats",
+    tags=["Estadísticas"],
+    dependencies=[Depends(get_current_user)],
+)
+app.include_router(
+    chat_controller.router,
+    prefix="/api",
+    tags=["Chat"],
+    dependencies=[Depends(get_current_user)],
+)
+
+
+@app.on_event("startup")
+async def on_startup() -> None:
+    init_db()
 
 
 @app.get("/")

@@ -22,8 +22,10 @@ class SolicitudWeb(Base):
 Base.metadata.create_all(bind=engine)
 
 try:
-    with engine.begin() as conn:
-        conn.execute(text("ALTER TABLE actas ADD COLUMN IF NOT EXISTS tipo_acta VARCHAR"))
+    existing_columns = [col["name"] for col in inspect(engine).get_columns("actas")]
+    if "tipo_acta" not in existing_columns:
+        with engine.begin() as conn:
+            conn.execute(text("ALTER TABLE actas ADD COLUMN tipo_acta VARCHAR"))
 except Exception as schema_err:
     print(f"Aviso de esquema (tipo_acta): {schema_err}")
 
