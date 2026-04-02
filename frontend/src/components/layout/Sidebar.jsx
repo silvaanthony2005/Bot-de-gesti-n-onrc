@@ -1,7 +1,8 @@
 import React from 'react';
-import { NavLink } from 'react-router-dom';
+import { NavLink, useNavigate } from 'react-router-dom';
 import { MessageSquare, Settings, LogOut, User, X } from 'lucide-react';
 import { twMerge } from 'tailwind-merge';
+import { useAuth } from '@/context/AuthContext';
 
 function SidebarItem({ icon: Icon, label, to, onClick }) {
   return (
@@ -22,6 +23,15 @@ function SidebarItem({ icon: Icon, label, to, onClick }) {
 }
 
 export function Sidebar({ isOpen, onClose }) {
+  const navigate = useNavigate();
+  const { user, logout } = useAuth();
+
+  const handleLogout = () => {
+    logout();
+    onClose?.();
+    navigate('/login', { replace: true });
+  };
+
   return (
     <>
     {/* Mobile Overlay */}
@@ -68,7 +78,10 @@ export function Sidebar({ isOpen, onClose }) {
             <Settings size={20} />
             <span>Settings</span>
         </button>
-        <button className="w-full flex items-center gap-3 px-4 py-3 text-gray-400 hover:text-red-400 hover:bg-red-400/10 rounded-xl transition-colors">
+        <button
+          onClick={handleLogout}
+          className="w-full flex items-center gap-3 px-4 py-3 text-gray-400 hover:text-red-400 hover:bg-red-400/10 rounded-xl transition-colors"
+        >
             <LogOut size={20} />
             <span>Log Out</span>
         </button>
@@ -80,8 +93,8 @@ export function Sidebar({ isOpen, onClose }) {
             <User size={24} />
         </div>
         <div className="flex-1 overflow-hidden">
-            <p className="text-sm font-semibold text-white truncate">Ayush Gupta</p>
-            <p className="text-xs text-gray-500 truncate">ayush@gmail.com</p>
+          <p className="text-sm font-semibold text-white truncate">{user?.full_name || 'Usuario'}</p>
+          <p className="text-xs text-gray-500 truncate">{user?.email || ''}</p>
         </div>
       </div>
     </aside>

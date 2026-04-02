@@ -173,7 +173,15 @@ export default function ChatPage() {
     return (
       <div className="flex flex-col gap-2">
         {isBot ? (
-          <div className="prose prose-invert max-w-none prose-p:my-1 prose-headings:my-2 prose-li:my-0.5 prose-ul:my-2 prose-ol:my-2 prose-strong:text-white prose-code:text-primary-300">
+          <div className="prose prose-invert max-w-none 
+                          prose-p:my-3 
+                          prose-headings:mt-6 prose-headings:mb-3 
+                          prose-li:my-1 prose-ul:my-3 prose-ol:my-3 
+                          prose-strong:text-white prose-code:text-primary-300
+                          prose-table:w-full prose-table:border-collapse prose-table:my-4
+                          prose-thead:bg-dark-700/50 prose-th:px-4 prose-th:py-2 prose-th:text-left prose-th:border-b-2 prose-th:border-dark-600
+                          prose-td:px-4 prose-td:py-2 prose-td:border-b prose-td:border-dark-700/50
+                          leading-relaxed">
             <ReactMarkdown remarkPlugins={[remarkGfm]}>{msg.text || ''}</ReactMarkdown>
           </div>
         ) : (
