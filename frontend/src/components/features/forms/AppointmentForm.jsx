@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import axios from 'axios';
 import { Calendar, Clock, User, Mail, Send, X, CheckCircle } from 'lucide-react';
+import api from '@/lib/api';
 
 export default function AppointmentForm({ onSubmit, onCancel }) {
   const [formData, setFormData] = useState({
@@ -24,8 +24,7 @@ export default function AppointmentForm({ onSubmit, onCancel }) {
     setErrorMsg('');
 
     try {
-      // Llamada directa al Backend (asegúrate de que la URL sea correcta para tu entorno)
-      const response = await axios.post('http://localhost:8000/api/appointments/book', formData);
+      const response = await api.post('/appointments/book', formData);
       
       setStatus('success');
       setTimeout(() => {

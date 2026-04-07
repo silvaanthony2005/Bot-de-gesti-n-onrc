@@ -2,7 +2,7 @@ import axios from 'axios';
 import { AUTH_TOKEN_KEY } from '@/lib/authStorage';
 
 const api = axios.create({
-  baseURL: 'http://localhost:8000/api', // Asegúrate de que este puerto coincida con tu backend
+  baseURL: import.meta.env.VITE_API_BASE_URL || '/api',
   headers: {
     'Content-Type': 'application/json',
   },

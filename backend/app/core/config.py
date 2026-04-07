@@ -27,6 +27,7 @@ class Settings(BaseSettings):
 
     # CORS Configuration
     BACKEND_CORS_ORIGINS: list[str] = ["http://localhost:5173", "http://localhost:3000"]
+    BACKEND_CORS_ORIGIN_REGEX: str = r"https://.*\.trycloudflare\.com"
 
     # Email Configuration
     MAIL_USERNAME: str = ""

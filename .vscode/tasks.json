@@ -44,8 +44,20 @@
             "isBackground": true
         },
         {
+            "label": "Start Cloudflared Tunnel",
+            "type": "shell",
+            "command": "cloudflared tunnel --url http://localhost:5173",
+            "presentation": {
+                "reveal": "always",
+                "panel": "dedicated",
+                "group": "server"
+            },
+            "problemMatcher": [],
+            "isBackground": true
+        },
+        {
             "label": "Start All Services",
-            "dependsOn": ["Start Backend", "Start Frontend", "Start n8n"],
+            "dependsOn": ["Start Backend", "Start Frontend", "Start n8n", "Start Cloudflared Tunnel"],
             "problemMatcher": [],
             "group": {
                 "kind": "build",

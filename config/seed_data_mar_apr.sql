@@ -38,7 +38,27 @@ INSERT INTO citas (fecha, hora, solicitante_email, solicitante_nombre, tipo_tram
 ('2026-04-30', '09:00', 'e.gil@gmail.com', 'Eduardo Gil', 'Matrimonio', '2026-04-25 14:00:00', true);
 
 -- ==========================================
--- 2. POBLAR TABLA: ACTAS
+-- 2. POBLAR TABLA: REGISTRADORES
+-- ==========================================
+INSERT INTO registradores (
+	nombre1,
+	nombre2,
+	apellido1,
+	apellido2,
+	cedula,
+	oficina,
+	resolucion_nro,
+	resolucion_fecha,
+	gaceta_nro,
+	gaceta_tipo,
+	gaceta_fecha
+) VALUES
+('Registrador', '', 'Principal', '', 'V-999999', 'Registro Civil San Cristóbal', '000', '01/01/2024', '123', 'Extraordinaria', '01/01/2024'),
+('Registrador', '', 'Principal', '', 'V-0000000', 'Oficina Registro Civil', '000', '01/01/2024', '123', 'Extraordinaria', '01/01/2024')
+ON CONFLICT (cedula) DO NOTHING;
+
+-- ==========================================
+-- 3. POBLAR TABLA: ACTAS
 -- ==========================================
 INSERT INTO actas (numero_acta, folio, fecha_acta, fecha_manifestacion, estado, municipio, parroquia, registrador_id, tipo_acta) VALUES
 -- Multiples actas de Marzo
