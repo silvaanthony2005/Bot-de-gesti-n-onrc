@@ -9,7 +9,7 @@ const Field = ({ label, required = true, ...props }) => (
     <input
       {...props}
       required={required}
-      className="w-full bg-transparent border-0 border-b border-white/20 px-0 py-2 text-gray-100 placeholder:text-gray-500 focus:border-primary-500 focus:ring-0 outline-none"
+      className="w-full rounded-lg border border-slate-500/40 bg-gradient-to-b from-slate-900 to-slate-950 px-3 py-2.5 text-gray-100 placeholder:text-slate-500 shadow-inner shadow-slate-950/40 transition-all duration-150 hover:border-primary-400/60 focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500/60"
     />
   </label>
 );
@@ -17,13 +17,35 @@ const Field = ({ label, required = true, ...props }) => (
 const SelectField = ({ label, children, required = true, ...props }) => (
   <label className="flex flex-col gap-1 text-sm text-gray-300">
     <span className="font-medium text-gray-400">{label}</span>
-    <select
-      {...props}
-      required={required}
-      className="w-full bg-transparent border-0 border-b border-white/20 px-0 py-2 text-gray-100 focus:border-primary-500 focus:ring-0 outline-none"
-    >
-      {children}
-    </select>
+    {(() => {
+      const styledChildren = React.Children.map(children, (child) => {
+        if (!React.isValidElement(child) || child.type !== 'option') return child;
+        return React.cloneElement(child, {
+          style: {
+            backgroundColor: '#0b1220',
+            color: '#e2e8f0',
+            padding: '8px',
+            ...child.props.style,
+          },
+        });
+      });
+
+      return (
+        <div className="relative">
+          <select
+            {...props}
+            required={required}
+            className="w-full appearance-none rounded-lg border border-slate-500/40 bg-gradient-to-b from-slate-900 to-slate-950 px-3 py-2.5 pr-10 text-gray-100 shadow-inner shadow-slate-950/40 transition-all duration-150 hover:border-primary-400/60 focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500/60"
+            style={{ colorScheme: 'dark' }}
+          >
+            {styledChildren}
+          </select>
+          <span className="pointer-events-none absolute inset-y-0 right-3 flex items-center text-xs text-slate-300">
+            ▼
+          </span>
+        </div>
+      );
+    })()}
   </label>
 );
 
@@ -101,20 +123,26 @@ const RegisterUEHForm = ({ onSubmit, onCancel }) => {
 
   if (pdfUrl) {
     return (
-      <Card className="p-6 bg-dark-800/80 border border-emerald-500/30 rounded-2xl">
-        <h3 className="text-xl font-bold text-emerald-300 mb-4">¡Acta Generada!</h3>
+      <Card className="p-6 bg-gradient-to-br from-slate-900 via-dark-800 to-slate-950 border border-emerald-400/35 rounded-2xl shadow-xl shadow-emerald-900/20">
+        <h3 className="text-xl font-bold text-emerald-300 mb-2">Acta Generada Correctamente</h3>
+        <p className="text-sm text-slate-300 mb-4">Tu documento esta listo. Presiona el boton para descargar el PDF oficial.</p>
         <a href={pdfUrl} download="acta_ueh.pdf">
-          <Button className="w-full bg-emerald-600 hover:bg-emerald-700">Descargar PDF</Button>
+          <Button className="w-full bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-500 hover:to-emerald-400 text-white shadow-lg shadow-emerald-900/30">Descargar PDF</Button>
         </a>
       </Card>
     );
   }
 
   return (
-    <Card className="p-5 md:p-6 w-full max-w-4xl mx-auto bg-dark-800/80 backdrop-blur-xl border border-white/10 shadow-xl mt-4 text-gray-100 rounded-2xl">
-      <h3 className="text-xl font-semibold mb-5 text-white border-b border-white/10 pb-3">
-        Registro Civil - INSERCION DE ACTAS (Paso {step}/3)
-      </h3>
+    <Card className="p-5 md:p-6 w-full max-w-4xl mx-auto bg-gradient-to-br from-slate-900/95 via-dark-800/90 to-slate-950/95 backdrop-blur-xl border border-slate-500/25 shadow-2xl shadow-black/40 mt-4 text-gray-100 rounded-2xl">
+      <div className="flex items-center justify-between gap-3 mb-5 border-b border-slate-500/25 pb-3">
+        <h3 className="text-xl font-semibold text-white">
+          Registro Civil - INSERCION DE ACTAS
+        </h3>
+        <span className="text-xs font-semibold uppercase tracking-wide px-2.5 py-1 rounded-full border border-primary-400/40 bg-primary-500/10 text-primary-300">
+          Paso {step}/3
+        </span>
+      </div>
       <form
         ref={formRef}
         onKeyDown={(e) => {
@@ -128,7 +156,7 @@ const RegisterUEHForm = ({ onSubmit, onCancel }) => {
         {/* PASO 1: UNIDO DE HECHO */}
         {step === 1 && (
           <div className="space-y-5 animation-fade-in">
-            <div className="rounded-xl border border-white/10 bg-dark-900/40 p-4">
+            <div className="rounded-xl border border-slate-500/25 bg-gradient-to-b from-slate-900/80 to-slate-950/70 p-4 shadow-lg shadow-black/20">
               <h4 className="font-semibold text-gray-100 mb-3">Tipo de Acta</h4>
               <SelectField
                 label="Trámite"
@@ -147,7 +175,7 @@ const RegisterUEHForm = ({ onSubmit, onCancel }) => {
               </SelectField>
             </div>
 
-            <div className="rounded-xl border border-white/10 bg-dark-900/40 p-4">
+            <div className="rounded-xl border border-slate-500/25 bg-gradient-to-b from-slate-900/80 to-slate-950/70 p-4 shadow-lg shadow-black/20">
               <h4 className="font-semibold text-gray-100 mb-3">Ubicación del Acta</h4>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <Field label="Estado" name="nombrestado" placeholder="Ej: Táchira" required onChange={handleChange} value={formData.nombrestado} />
@@ -156,7 +184,7 @@ const RegisterUEHForm = ({ onSubmit, onCancel }) => {
               </div>
             </div>
 
-            <div className="rounded-xl border border-white/10 bg-dark-900/40 p-4">
+            <div className="rounded-xl border border-slate-500/25 bg-gradient-to-b from-slate-900/80 to-slate-950/70 p-4 shadow-lg shadow-black/20">
               <h4 className="font-semibold text-gray-100 mb-3">Datos del Primer Declarante</h4>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <Field label="Primer Nombre" name="nombre1Unido" placeholder="Nombres" required onChange={handleChange} value={formData.nombre1Unido} />
@@ -187,7 +215,7 @@ const RegisterUEHForm = ({ onSubmit, onCancel }) => {
         {/* PASO 2: UNIDA DE HECHO */}
         {step === 2 && (
           <div className="space-y-5 animation-fade-in">
-            <div className="rounded-xl border border-white/10 bg-dark-900/40 p-4">
+            <div className="rounded-xl border border-slate-500/25 bg-gradient-to-b from-slate-900/80 to-slate-950/70 p-4 shadow-lg shadow-black/20">
               <h4 className="font-semibold text-gray-100 mb-3">Datos del Segundo Declarante</h4>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <Field label="Primer Nombre" name="nombre1Unida" placeholder="Nombres" required onChange={handleChange} value={formData.nombre1Unida} />
@@ -218,7 +246,7 @@ const RegisterUEHForm = ({ onSubmit, onCancel }) => {
         {/* PASO 3: TESTIGOS Y FINALIZAR */}
         {step === 3 && (
            <div className="space-y-5 animation-fade-in">
-            <div className="rounded-xl border border-white/10 bg-dark-900/40 p-4">
+          <div className="rounded-xl border border-slate-500/25 bg-gradient-to-b from-slate-900/80 to-slate-950/70 p-4 shadow-lg shadow-black/20">
             <h4 className="font-semibold text-gray-100 mb-3">Datos de Testigos</h4>
             
             <p className="text-xs font-semibold uppercase text-gray-400">Testigo 1</p>
@@ -251,8 +279,8 @@ const RegisterUEHForm = ({ onSubmit, onCancel }) => {
               <Field label="Dirección" name="direccionTestigo2" placeholder="Dirección" onChange={handleChange} value={formData.direccionTestigo2} />
             </div>
 
-            <div className="pt-4 border-t border-white/10 mt-4">
-              <p className="text-xs text-center text-gray-400">Al procesar, certifica que los datos son verdaderos.</p>
+            <div className="pt-4 border-t border-slate-500/25 mt-4">
+              <p className="text-xs text-center text-slate-300">Al procesar, certifica que los datos son verdaderos.</p>
             </div>
             </div>
           </div>
@@ -260,15 +288,15 @@ const RegisterUEHForm = ({ onSubmit, onCancel }) => {
         
         <div className="flex justify-between gap-2 pt-4">
           {step > 1 ? (
-             <Button type="button" variant="outline" onClick={prevStep}>Atrás</Button>
+             <Button type="button" variant="outline" onClick={prevStep} className="border-slate-400/35 bg-slate-900/60 text-slate-200 hover:bg-slate-800 hover:text-white">Atrás</Button>
           ) : (
-             <Button type="button" variant="ghost" onClick={onCancel}>Cancelar</Button>
+             <Button type="button" variant="ghost" onClick={onCancel} className="text-slate-300 hover:bg-slate-800/70 hover:text-white">Cancelar</Button>
           )}
 
           {step < 3 ? (
-             <Button type="button" onClick={nextStep} className="bg-indigo-600 hover:bg-indigo-700">Siguiente</Button>
+             <Button type="button" onClick={nextStep} className="bg-gradient-to-r from-primary-600 to-primary-500 hover:from-primary-500 hover:to-primary-400 text-white shadow-lg shadow-primary-900/30">Siguiente</Button>
           ) : (
-             <Button type="button" onClick={handleSubmit} disabled={loading} className="bg-emerald-600 hover:bg-emerald-700 w-full ml-auto">
+             <Button type="button" onClick={handleSubmit} disabled={loading} className="bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-500 hover:to-emerald-400 text-white w-full ml-auto shadow-lg shadow-emerald-900/30">
                {loading ? 'Generando Acta...' : 'Generar Documento PDF'}
              </Button>
           )}

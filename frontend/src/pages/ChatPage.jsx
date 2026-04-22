@@ -189,7 +189,7 @@ export default function ChatPage() {
         )}
         
         {FormComponent && (
-          <div className="mt-4 p-2 bg-white rounded-lg text-gray-900 border border-gray-200 shadow-sm animate-in fade-in slide-in-from-bottom-4">
+           <div className="mt-4 p-0 bg-transparent rounded-lg text-gray-100 border-0 shadow-none animate-in fade-in slide-in-from-bottom-4">
              <FormComponent onSubmit={(successMsg) => {
                 setMessages(prev => [...prev, { id: Date.now(), role: 'bot', text: successMsg }]);
              }} onCancel={() => {
