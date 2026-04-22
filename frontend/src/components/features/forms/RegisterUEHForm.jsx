@@ -1,6 +1,7 @@
 import React, { useRef, useState } from 'react';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
+import api from '@/lib/api';
 
 const Field = ({ label, required = true, ...props }) => (
   <label className="flex flex-col gap-1 text-sm text-gray-300">
@@ -82,23 +83,17 @@ const RegisterUEHForm = ({ onSubmit, onCancel }) => {
 
     setLoading(true);
     try {
-      const response = await fetch('http://localhost:8000/api/documents/generate-ueh', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData)
+      const response = await api.post('/documents/generate-ueh', formData, {
+        responseType: 'blob'
       });
-      
-      if (response.ok) {
-        const blob = await response.blob();
-        const url = window.URL.createObjectURL(blob);
-        setPdfUrl(url);
-        if (onSubmit) onSubmit("Registro completado. Descarga tu certificado oficial.");
-      } else {
-        alert("Error en el servidor al generar PDF");
-      }
+
+      const url = window.URL.createObjectURL(response.data);
+      setPdfUrl(url);
+      if (onSubmit) onSubmit("Registro completado. Descarga tu certificado oficial.");
     } catch (error) {
       console.error(error);
-      alert("Error de conexión");
+      const serverDetail = error?.response?.data?.detail;
+      alert(serverDetail || "Error de conexión o autenticación");
     } finally {
       setLoading(false);
     }
