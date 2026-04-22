@@ -6,48 +6,82 @@
 <style type="text/css">
   @page {
       size: letter;
-      margin: 0.5cm;
+      margin: 0.45cm;
   }
   body {
-      font-family: sans-serif; /* Gill Sans MT no suele estar en linux/servers, usaremos sans-serif genérico o Arial */
+      font-family: Helvetica, Arial, sans-serif;
       font-size: 11px;
+      color: #111111;
   }
-  /* Estilos específicos copiados y adaptados de la referencia */
-  .lineavertical { border-right:1px #000 solid; }
-  .lineavertical2 { border-left:1px #000 solid; }
-  .lineahorizontal { border-top:1px #000 solid; }
-  
-  .Estilo6 { 
-      font-weight: bold; 
-      font-size: 13px; /* Ajustado para visualización */
+  .header-box {
+      border: 1px solid #1f2a44;
+      padding: 6px;
+      margin-bottom: 8px;
+      background-color: #f5f7fb;
+  }
+  .header-title {
+      font-weight: bold;
+      font-size: 13px;
+      text-align: center;
+      line-height: 1.25;
+      text-transform: uppercase;
+      color: #1f2a44;
+  }
+  .doc-title {
+      text-align: center;
+      font-size: 14px;
+      font-weight: bold;
+      letter-spacing: 0.4px;
+      margin: 6px 0 8px 0;
+      text-transform: uppercase;
+  }
+  .meta-text {
+      font-size: 10px;
+      font-weight: bold;
+      line-height: 1.35;
+  }
+  .logo-cell {
+      text-align: center;
+      vertical-align: middle;
   }
   .Estilo8 { color: #FFFFFF; font-weight: bold; }
-  
+
   .Estilo25 { 
-      font-size: 11px; 
+      font-size: 10.5px; 
       font-weight: bold; 
+      line-height: 1.35;
   }
 
-  /* 
-     Truco vital para simular bordes negros finos:
-     La tabla tiene fondo NEGRO (#000000).
-     Las celdas tienen fondo BLANCO (#FFFFFF).
-     Con cellspacing="1", se ve un borde negro de 1px entre celdas.
-  */
   table.bordered-table {
       width: 100%;
-      background-color: #000000;
-      border-spacing: 1px;
-      margin-bottom: 2px;
+      border-collapse: collapse;
+      border: 1px solid #5f5f5f;
+      margin-bottom: 1px;
   }
-  
+
   table.bordered-table td {
+      border: 1px solid #7a7a7a;
       background-color: #FFFFFF;
-      padding: 3px;
+      padding: 2px 4px;
       vertical-align: middle;
   }
 
-  /* Tabla header sin bordes */
+    .section-letter {
+        background-color: #1b1b1b !important;
+      color: #FFFFFF;
+      text-align: center;
+      font-weight: bold;
+      width: 20px;
+        padding: 2px 0;
+    }
+
+    .section-title {
+        background-color: #c9d6ea !important;
+      font-weight: bold;
+        letter-spacing: 0.2px;
+        color: #1f2a44;
+    }
+
   table.header-table {
       width: 100%;
       border: 0;
@@ -56,50 +90,80 @@
       padding: 2px;
       vertical-align: top;
   }
+  .footer-note {
+      margin-top: 4px;
+      font-size: 9px;
+      color: #3a3a3a;
+      text-align: center;
+  }
+
+    .signatures-wrapper {
+      margin-top: 8px;
+      page-break-inside: avoid;
+    }
+
+    table.signatures-table {
+      width: 100%;
+      text-align: center;
+      border: 0;
+      page-break-inside: avoid;
+    }
+
+    table.signatures-table td {
+      padding: 2px;
+      page-break-inside: avoid;
+    }
 </style>
 </head>
 <body>
 
-<!-- ENCABEZADO -->
-<div style="text-align: center; margin-bottom: 10px;">
-    <span class="Estilo6">República Bolivariana de Venezuela<br />
-    Consejo Nacional Electoral<br />
-    Comisión de Registro Civil y Electoral</span>
+<div class="header-box">
+  <table class="header-table">
+    <tr>
+      <td width="20%" class="logo-cell">
+        <img src="../static/images/logo.png" width="72" height="72" />
+      </td>
+      <td width="60%">
+        <div class="header-title">
+          Republica Bolivariana de Venezuela<br />
+          Consejo Nacional Electoral<br />
+          Comision de Registro Civil y Electoral
+        </div>
+      </td>
+      <td width="20%" class="logo-cell">
+        <img src="../static/images/sello.jpg" width="72" height="72" />
+      </td>
+    </tr>
+  </table>
 </div>
 
-<table class="header-table">
+<table class="header-table" style="margin-bottom: 6px;">
   <tr>
-    <td width="35%">
-      <span class="Estilo6">Estado: {{ nombrestado }}</span><br/>
-      <span class="Estilo6">Municipio: {{ nombremunicipio }}</span><br/>
-      <span class="Estilo6">Parroquia: {{ nombreparroquia }}</span>
+    <td width="33%" class="meta-text">
+      Estado: {{ nombrestado }}<br/>
+      Municipio: {{ nombremunicipio }}<br/>
+      Parroquia: {{ nombreparroquia }}
     </td>
-    <td width="15%" align="center">
-       <!-- Ajustar ruta relativa a la carpeta de ejecución o absoluta -->
-       <img src="Bot_CNE/backend/app/static/images/logo.png" width="80" height="60" />
+    <td width="34%" class="doc-title">
+      Acta de {{ tipoActa }}
     </td>
-    <td width="15%" align="center">
-       <img src="Bot_CNE/backend/app/static/images/sello.jpg" width="80" height="60" />
-    </td>
-    <td width="35%" align="right">
-      <span class="Estilo6">Acta Nº: {{ charnacta }}</span><br/>
-      <span class="Estilo6">Folio Nº: {{ folio }}</span><br/>
-      <span class="Estilo6">Día: {{ dia1 }}</span><br/>
-      <span class="Estilo6">Mes: {{ mes1 }}</span><br/>
-      <span class="Estilo6">Año: {{ ano1 }}</span>
+    <td width="33%" class="meta-text" align="right">
+      Acta No: {{ charnacta }}<br/>
+      Folio No: {{ folio }}<br/>
+      Fecha: {{ dia1 }}/{{ mes1 }}/{{ ano1 }}
     </td>
   </tr>
 </table>
 
-<div style="text-align: center; font-weight: bold; margin: 5px 0 10px 0;">
-    <span class="Estilo6">{{ tipoActa }}</span>
+<div style="text-align: center; font-weight: bold; margin: 4px 0 10px 0; border-top: 1px solid #1f2a44; border-bottom: 1px solid #1f2a44; padding: 4px 0;">
+    <span style="font-size: 12px;">Documento Oficial de Registro Civil</span>
 </div>
 
 <!-- A. DATOS REGISTRADOR -->
 <table class="bordered-table">
   <tr>
-    <td width="20" style="background-color: #000000; text-align:center;"><span class="Estilo8">A</span></td>
-    <td style="background-color: #D8D8D8;"><strong>Datos del Registrador(a) Civil:</strong></td>
+    <td class="section-letter" width="20" align="center" valign="middle" bgcolor="#000000" style="background-color:#000000;"><font color="#FFFFFF"><strong>A</strong></font></td>
+    <td class="section-title" bgcolor="#C7C7C7" style="background-color:#C7C7C7;"><strong>Datos del Registrador(a) Civil:</strong></td>
   </tr>
 </table>
 
@@ -127,8 +191,8 @@
 <!-- B. DATOS UNIDO DE HECHO -->
 <table class="bordered-table">
   <tr>
-    <td width="20" style="background-color: #000000; text-align:center;"><span class="Estilo8">B</span></td>
-    <td style="background-color: #D8D8D8;"><strong>Datos del Unido de Hecho:</strong></td>
+    <td class="section-letter" width="20" align="center" valign="middle" bgcolor="#000000" style="background-color:#000000;"><font color="#FFFFFF"><strong>B</strong></font></td>
+    <td class="section-title" bgcolor="#C7C7C7" style="background-color:#C7C7C7;"><strong>Datos del Unido de Hecho:</strong></td>
   </tr>
 </table>
 <table class="bordered-table">
@@ -170,8 +234,8 @@
 <!-- C. DATOS UNIDA DE HECHO -->
 <table class="bordered-table">
   <tr>
-    <td width="20" style="background-color: #000000; text-align:center;"><span class="Estilo8">C</span></td>
-    <td style="background-color: #D8D8D8;"><strong>Datos del Unida de Hecho:</strong></td>
+    <td class="section-letter" width="20" align="center" valign="middle" bgcolor="#000000" style="background-color:#000000;"><font color="#FFFFFF"><strong>C</strong></font></td>
+    <td class="section-title" bgcolor="#C7C7C7" style="background-color:#C7C7C7;"><strong>Datos del Unida de Hecho:</strong></td>
   </tr>
 </table>
 <table class="bordered-table">
@@ -213,8 +277,8 @@
 <!-- D. MANIFESTACION -->
 <table class="bordered-table">
   <tr>
-    <td width="20" style="background-color: #000000; text-align:center;"><span class="Estilo8">D</span></td>
-    <td style="background-color: #D8D8D8;"><strong>Manifestación expresa</strong></td>
+    <td class="section-letter" width="20" align="center" valign="middle" bgcolor="#000000" style="background-color:#000000;"><font color="#FFFFFF"><strong>D</strong></font></td>
+    <td class="section-title" bgcolor="#C7C7C7" style="background-color:#C7C7C7;"><strong>Manifestación expresa</strong></td>
   </tr>
 </table>
 <table class="bordered-table">
@@ -231,8 +295,8 @@
 <!-- F. TESTIGOS -->
 <table class="bordered-table">
   <tr>
-    <td width="20" style="background-color: #000000; text-align:center;"><span class="Estilo8">F</span></td>
-    <td style="background-color: #D8D8D8;"><strong>Datos de los Testigos</strong></td>
+    <td class="section-letter" width="20" align="center" valign="middle" bgcolor="#000000" style="background-color:#000000;"><font color="#FFFFFF"><strong>F</strong></font></td>
+    <td class="section-title" bgcolor="#C7C7C7" style="background-color:#C7C7C7;"><strong>Datos de los Testigos</strong></td>
   </tr>
 </table>
 
@@ -276,8 +340,8 @@
 </table>
 
 <!-- FIRMAS -->
-<br/><br/><br/>
-<table style="width: 100%; text-align: center; border: 0;">
+<div class="signatures-wrapper">
+<table class="signatures-table">
     <tr>
         <td width="50%" align="center">
             __________________________<br/>
@@ -289,7 +353,7 @@
         </td>
     </tr>
     <tr>
-        <td colspan="2" style="height: 40px;">&nbsp;</td>
+      <td colspan="2" style="height: 18px;">&nbsp;</td>
     </tr>
     <tr>
         <td colspan="2" align="center">
@@ -298,6 +362,6 @@
         </td>
     </tr>
 </table>
-
+  </div>
 </body>
 </html>
